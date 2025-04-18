@@ -1,0 +1,130 @@
+.profile_page_container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #121212;
+    /* Dark background */
+    color: #fff;
+    /* White text */
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    padding: 2rem;
+    gap: 2rem;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+}
+
+.user_section,
+.orders_section {
+    background-color: #1a1a1a;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #32cd32;
+    /* Accent green */
+}
+
+.user_section {
+    width: 16rem;
+}
+
+.orders_section {
+    flex: 1;
+}
+
+.user_section h2,
+.orders_section h2 {
+    text-align: center;
+    color: #32cd32;
+    /* Accent green */
+}
+
+.user_info label {
+    display: block;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.input {
+    width: calc(100% - 1rem);
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #32cd32;
+    background-color: #121212;
+    color: #fff;
+}
+
+.save_button,
+.logout_button {
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #32cd32;
+    color: #fff;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.save_button:hover,
+.logout_button:hover {
+    background-color: #28a428;
+}
+
+.order_list {
+    list-style: none;
+    padding: 0;
+}
+
+.order_item {
+    border: 1px solid #32cd32;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #1a1a1a;
+}
+
+.order_item h4 {
+    margin-top: 1rem;
+    color: #32cd32;
+}
+
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.page_button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #32cd32;
+    background-color: #1a1a1a;
+    color: #32cd32;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.page_button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.page_button:hover:enabled {
+    background-color: #32cd32;
+    color: #1a1a1a;
+}
+
+.page_info {
+    font-size: 1rem;
+    color: #ccc;
+}

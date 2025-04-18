@@ -1,0 +1,44 @@
+/* General Footer Styling */
+.footer {
+    width: calc(100% - 4rem);
+    padding: 1rem 2rem;
+    background: #1a1a1a; /* Dark background */
+    border-top: 1px solid #32cd32; /* Accent green border */
+    color: #fff; /* White text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Footer Text */
+.text {
+    font-size: 0.9rem;
+    color: #ccc; /* Slightly lighter white for subtlety */
+}
+
+/* Footer Links */
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.link {
+    text-decoration: none;
+    color: #32cd32; /* Accent green color */
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.link:hover {
+    color: #fff; /* White text on hover */
+}

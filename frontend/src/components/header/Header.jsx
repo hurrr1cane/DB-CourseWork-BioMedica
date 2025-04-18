@@ -1,0 +1,35 @@
+import React from 'react';
+import styles from './header.module.css';
+import { NavLink } from 'react-router-dom';
+
+export default function Header() {
+    const token = localStorage.getItem("accessToken");
+    const user = token ? JSON.parse(localStorage.getItem("user")) : null;
+
+    return (
+        <header className={styles.header}>
+            <NavLink to="/" className={styles.nav_link + " " + styles.nav_logo}>
+                <h1>Biomedica</h1>
+            </NavLink>
+            <nav className={styles.nav}>
+                <NavLink to="/make-order" className={styles.order_button}>
+                    Make Order
+                </NavLink>
+                {token ? (
+                    <div className={styles.user_info}>
+                        {/* <span className={styles.user_name}>
+                            {user.name} {user.surname}
+                        </span> */}
+                        <NavLink to="/profile" className={styles.nav_link}>
+                            Profile
+                        </NavLink>
+                    </div>
+                ) : (
+                    <NavLink to="/login" className={styles.auth_button}>
+                        Authorize
+                    </NavLink>
+                )}
+            </nav>
+        </header>
+    );
+}

@@ -1,0 +1,85 @@
+/* General Header Styling */
+.header {
+    width: calc(100% - 4rem);
+    height: 4rem;
+    padding: 1rem 2rem;
+    background: #1a1a1a; /* Dark background */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    position: fixed;
+}
+
+/* Logo */
+.nav_logo h1 {
+    font-size: 1.5rem;
+    color: #32cd32; /* Accent green color */
+    text-transform: uppercase;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Navigation Bar */
+.nav {
+    display: flex;
+    align-items: center;
+}
+
+/* User Info */
+.user_info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user_name {
+    font-size: 1rem;
+    color: #fff; /* White text */
+}
+
+/* Navigation Links */
+.nav_link {
+    text-decoration: none;
+    font-size: 1rem;
+    color: #32cd32; /* Accent green color */
+    transition: color 0.3s;
+}
+
+.nav_link:hover {
+    color: #fff; /* White text on hover */
+}
+
+/* Authorize Button */
+.auth_button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    color: #fff; /* White text */
+    background: #32cd32; /* Accent green */
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.auth_button:hover {
+    background: #28a428; /* Darker green on hover */
+    transform: scale(1.05);
+}
+
+.order_button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    color: #fff; /* White text */
+    background: #32cd32; /* Accent green */
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: transform 0.2s;
+    margin-right: 1rem;
+}
+
+.order_button:hover {
+    background: #28a428; /* Darker green on hover */
+    transform: scale(1.05);
+}

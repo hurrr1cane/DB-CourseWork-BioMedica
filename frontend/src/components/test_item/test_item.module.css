@@ -1,0 +1,49 @@
+.testItem {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 1rem;
+    border: 2px solid green; /* Green border */
+    border-radius: 5px;
+    background-color: #101010;
+    cursor: pointer;
+}
+
+.testInfo {
+    display: flex;
+    flex-direction: row; /* Change to row to display items horizontally */
+    justify-content: space-between;
+    width: 100%; /* Ensure it takes full available width */
+    margin-right: 15px;
+}
+
+.testItemLabel {
+    font-weight: bold;
+    margin-right: 10px; /* Space between label and other items */
+}
+
+.testItemInput {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 150px;
+    margin-left: 0.5rem;
+}
+
+.timePicker {
+    margin-top: 10px;
+    align-self: flex-end;
+}
+
+.selectStatus {
+    font-weight: bold;
+    color: green;
+}
+
+.errorMessage {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
