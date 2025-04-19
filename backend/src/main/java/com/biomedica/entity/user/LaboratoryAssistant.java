@@ -1,19 +1,33 @@
 package com.biomedica.entity.user;
 
+import com.biomedica.entity.Laboratory;
+import com.biomedica.entity.TestResult;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(name = "laboratory_assistant")
 public class LaboratoryAssistant extends User {
 
-    private String labAssistantField1; // Example specific field
-    private String labAssistantField2; // Another field
+    public LaboratoryAssistant() {
+        super.setRole(Role.LABORATORY_ASSISTANT);
+    }
 
+    @OneToMany(mappedBy = "laboratoryAssistant")
+    private List<TestResult> testResults;
+
+    @ManyToOne
+    private Laboratory laboratory;
 }

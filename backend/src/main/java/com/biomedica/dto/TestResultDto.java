@@ -21,5 +21,7 @@ public class TestResultDto {
 
     private TestDto test;
 
-    private UUID laboratoryId;
+    private LaboratoryDto laboratory;
+
+    private LaboratoryAssistantDto laboratoryAssistant;
 }

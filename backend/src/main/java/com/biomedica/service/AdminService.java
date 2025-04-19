@@ -34,6 +34,5 @@ public class AdminService {
         labAssistant.setSurname(registerLabAssistantRequest.getSurname());
 
         return userMapper.toDto(userRepository.save(labAssistant));
-
     }
 }

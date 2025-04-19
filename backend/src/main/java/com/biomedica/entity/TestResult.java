@@ -1,5 +1,6 @@
 package com.biomedica.entity;
 
+import com.biomedica.entity.user.LaboratoryAssistant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,4 +38,7 @@ public class TestResult {
 
     @ManyToOne
     private Laboratory laboratory;
+
+    @ManyToOne
+    private LaboratoryAssistant laboratoryAssistant;
 }

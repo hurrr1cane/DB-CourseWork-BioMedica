@@ -1,10 +1,12 @@
 package com.biomedica.entity;
 
+import com.biomedica.entity.user.LaboratoryAssistant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,4 +36,8 @@ public class Laboratory {
 
     @ManyToMany(mappedBy = "laboratories")
     private List<Test> tests;
+
+    @OneToMany(mappedBy = "laboratory")
+    private List<LaboratoryAssistant> laboratoryAssistants;
+
 }

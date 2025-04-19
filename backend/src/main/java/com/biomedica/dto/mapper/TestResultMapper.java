@@ -11,13 +11,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestResultMapper {
     private final TestMapper testMapper;
+    private final LaboratoryMapper laboratoryMapper;
+    private final LaboratoryAssistantMapper laboratoryAssistantMapper;
 
     public TestResultDto toDto(TestResult testResult) {
         return TestResultDto.builder()
                 .id(testResult.getId())
                 .result(testResult.getResult())
                 .test(testMapper.toDto(testResult.getTest()))
-                .laboratoryId(testResult.getLaboratory().getId())
+                .laboratory(laboratoryMapper.toDto(testResult.getLaboratory()))
+                .laboratoryAssistant(laboratoryAssistantMapper.toDto(testResult.getLaboratoryAssistant()))
                 .testDate(testResult.getTestDate())
                 .build();
     }

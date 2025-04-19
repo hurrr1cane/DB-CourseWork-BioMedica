@@ -7,8 +7,10 @@ import com.biomedica.entity.Laboratory;
 import com.biomedica.entity.Order;
 import com.biomedica.entity.Test;
 import com.biomedica.entity.TestResult;
+import com.biomedica.entity.user.LaboratoryAssistant;
 import com.biomedica.entity.user.Patient;
 import com.biomedica.entity.user.User;
+import com.biomedica.repository.LaboratoryAssistantRepository;
 import com.biomedica.repository.LaboratoryRepository;
 import com.biomedica.repository.OrderRepository;
 import com.biomedica.repository.TestRepository;
@@ -36,9 +38,9 @@ public class OrderService {
     private final LaboratoryRepository laboratoryRepository;
     private final TestRepository testRepository;
     private final TestResultRepository testResultRepository;
+    private final LaboratoryAssistantRepository laboratoryAssistantRepository;
 
     public Page<OrderDto> getOrders(Pageable pageable) {
-        log.info("I am getting orders");
         User user = auditService.getPrincipal();
 
         Patient patient = (Patient) user;
@@ -47,7 +49,6 @@ public class OrderService {
     }
 
     public OrderDto getOrder(UUID id) {
-        log.info("Piece");
         Order order = orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
         if (!order.getPatient().getId().equals(auditService.getPrincipal().getId())) {
@@ -59,9 +60,12 @@ public class OrderService {
 
     @Transactional
     public OrderDto createOrder(CreateOrderRequest createOrderRequest) {
+        log.info("Creating order with request: {}", createOrderRequest);
         User user = auditService.getPrincipal();
 
         Patient patient = (Patient) user;
+
+        log.info("Creating order for patient: {}", patient.getId());
 
         Order order = Order.builder()
                 .orderDate(OffsetDateTime.now())
@@ -79,7 +83,6 @@ public class OrderService {
                 throw new IllegalArgumentException("Test date must be 0, 15, 30, 45");
             }
 
-
             Laboratory laboratory = laboratoryRepository.findById(testRequest.getLaboratoryId())
                     .orElseThrow(() -> new EntityNotFoundException("Laboratory not found"));
             Test test = testRepository.findById(testRequest.getTestId())
@@ -94,11 +97,18 @@ public class OrderService {
                 throw new EntityNotFoundException("This test is already ordered");
             }
 
+            // Find an available laboratory assistant for this test
+            LaboratoryAssistant availableAssistant = laboratoryAssistantRepository.findByLaboratory(laboratory)
+                    .stream()
+                    .filter(assistant -> testResultRepository.findByLaboratoryAssistantAndTestDate(assistant, trueTestDate).isEmpty())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No available laboratory assistants at the requested time"));
 
             TestResult testResult = TestResult.builder()
                     .testDate(trueTestDate)
                     .test(test)
                     .laboratory(laboratory)
+                    .laboratoryAssistant(availableAssistant)
                     .order(savedOrder)
                     .build();
 
@@ -112,5 +122,17 @@ public class OrderService {
         var newOrder = orderRepository.save(savedOrder);
 
         return orderMapper.toDto(newOrder);
+    }
+
+    public OrderDto payOrder(UUID orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        if (!order.getPatient().getId().equals(auditService.getPrincipal().getId())) {
+            throw new EntityNotFoundException("Order not found");
+        }
+
+        order.setPaid(true);
+
+        return orderMapper.toDto(orderRepository.save(order));
     }
 }

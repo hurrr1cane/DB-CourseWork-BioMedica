@@ -29,6 +29,24 @@ export default function LoginPage() {
                 const data = await response.json();
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
+
+                // Parse the JWT token to get the role
+                try {
+                    const tokenPayload = data.accessToken.split(".")[1];
+                    // Handle base64url format by replacing non-base64 chars and adding padding if needed
+                    const base64 = tokenPayload.replace(/-/g, '+').replace(/_/g, '/');
+                    const payload = JSON.parse(window.atob(base64));
+                    
+                    // Check if role exists directly in payload
+                    if (payload && payload.role) {
+                        localStorage.setItem("userRole", payload.role);
+                    } else {
+                        console.warn("User role information not found in token");
+                    }
+                } catch (error) {
+                    console.error("Error parsing JWT token:", error);
+                }
+
                 navigate("/");
             } else {
                 const error = await response.json();

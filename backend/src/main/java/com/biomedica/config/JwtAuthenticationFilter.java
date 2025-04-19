@@ -124,13 +124,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
         );
 
-        if (!user.isEnabled() || !jwtService.isTokenValid(jwt, userDetails) || !isTokenValid) {
+        if (!user.isEnabled() || !jwtService.isTokenValid(jwt, userDetails) || Boolean.TRUE.equals(!isTokenValid)) {
             handleInvalidToken(response, request.getServletPath(), user);
             return;
         }
 
         setAuthentication(request, userDetails);
-        log.info("SET");
         filterChain.doFilter(request, response);
     }
 
@@ -153,8 +152,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        log.info("I am set");
     }
 
     private void setErrorResponse(HttpServletResponse response, ExceptionResponse exceptionResponse) throws IOException {

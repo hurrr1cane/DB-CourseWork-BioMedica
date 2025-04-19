@@ -45,4 +45,9 @@ public class OrderController {
         return ResponseEntity.ok(orderService.createOrder(createOrderRequest));
     }
 
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<OrderDto> payOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(orderService.payOrder(id));
+    }
+
 }

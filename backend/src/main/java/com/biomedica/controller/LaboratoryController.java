@@ -9,8 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -23,6 +26,11 @@ public class LaboratoryController {
     @GetMapping
     public ResponseEntity<Page<LaboratoryDto>> getLaboratories(Pageable pageable) {
         return ResponseEntity.ok(laboratoryService.getLaboratories(pageable));
+    }
+
+    @GetMapping("/{laboratoryId}")
+    public ResponseEntity<LaboratoryDto> getLaboratoryById(@PathVariable UUID laboratoryId) {
+        return ResponseEntity.ok(laboratoryService.getLaboratoryById(laboratoryId));
     }
 
     @GetMapping("/search")

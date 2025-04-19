@@ -5,7 +5,7 @@ export default function Footer() {
     return (
         <footer className={styles.footer}>
             <div className={styles.container}>
-                <p className={styles.text}>© 2024 Biomedica. All rights reserved.</p>
+                <p className={styles.text}>© {new Date().getFullYear()} Biomedica. All rights reserved.</p>
                 <nav className={styles.nav}>
                     <a href="/privacy" className={styles.link}>Privacy Policy</a>
                     <a href="/terms" className={styles.link}>Terms of Service</a>

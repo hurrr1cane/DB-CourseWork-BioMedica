@@ -6,15 +6,20 @@ export default function Header() {
     const token = localStorage.getItem("accessToken");
     const user = token ? JSON.parse(localStorage.getItem("user")) : null;
 
+    const userRole = localStorage.getItem("userRole");
+
     return (
         <header className={styles.header}>
             <NavLink to="/" className={styles.nav_link + " " + styles.nav_logo}>
                 <h1>Biomedica</h1>
             </NavLink>
             <nav className={styles.nav}>
-                <NavLink to="/make-order" className={styles.order_button}>
+                {!(userRole === "ADMINISTRATOR" || userRole === "LABORATORY_ASSISTANT") && <NavLink to="/make-order" className={styles.order_button}>
                     Make Order
-                </NavLink>
+                </NavLink> }
+                {userRole === "ADMINISTRATOR" && <NavLink to="/laboratories" className={styles.nav_link}>
+                    Laboratories
+                </NavLink>}
                 {token ? (
                     <div className={styles.user_info}>
                         {/* <span className={styles.user_name}>

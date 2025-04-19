@@ -83,6 +83,11 @@ public class LaboratoryService {
         return laboratoryRepository.findAll(pageable).map(laboratoryMapper::toDto);
     }
 
+    public LaboratoryDto getLaboratoryById(UUID laboratoryId) {
+        Laboratory laboratory = laboratoryRepository.findById(laboratoryId).orElseThrow(() -> new EntityNotFoundException("Laboratory was not found"));
+        return laboratoryMapper.toDto(laboratory);
+    }
+
     public Page<LaboratoryDto> getLaboratoriesWithFilters(LaboratorySearchDto searchDto, Pageable pageable) {
         // Створення специфікації для фільтрації
         Specification<Laboratory> spec = Specification.where(null);

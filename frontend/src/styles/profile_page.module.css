@@ -27,11 +27,13 @@
 }
 
 .user_section {
-    width: 16rem;
+    width: 100%;
+    min-width: 16rem;
 }
 
 .orders_section {
     flex: 1;
+    min-width: calc(100% - 16rem - 10rem);
 }
 
 .user_section h2,

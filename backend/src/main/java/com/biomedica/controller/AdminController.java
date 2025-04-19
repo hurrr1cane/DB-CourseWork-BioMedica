@@ -25,6 +25,11 @@ public class AdminController {
     private final AdminService adminService;
     private final LaboratoryService laboratoryService;
 
+    /**
+     * * Endpoint to register a new laboratory assistant.
+     * @param registerLabAssistantRequest The request body containing the details of the laboratory assistant to be registered.
+     * @return A ResponseEntity containing the registered laboratory assistant's details.
+     */
     @PostMapping("/register-lab-assistant")
     public ResponseEntity<UserDto> registerLabAssistant(@RequestBody @Valid RegisterLabAssistantRequest registerLabAssistantRequest) {
         return ResponseEntity.ok(adminService.registerLabAssistant(registerLabAssistantRequest));

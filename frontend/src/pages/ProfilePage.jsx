@@ -12,6 +12,8 @@ export default function ProfilePage() {
     const [totalPages, setTotalPages] = useState(0); // Total pages available
     const [loading, setLoading] = useState(true); // Loading state
 
+    const userRole = localStorage.getItem('userRole');
+
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem('accessToken');
@@ -105,6 +107,8 @@ export default function ProfilePage() {
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userRole');
         navigate('/login');
     };
 
@@ -121,6 +125,29 @@ export default function ProfilePage() {
             fetchOrders(currentPage - 1);
         }
     };
+
+    const handlePayForOrder = async (orderId) => {
+        const token = localStorage.getItem('accessToken');
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/patient/orders/${orderId}/pay`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to pay for order');
+            }
+
+            alert('Payment successful!');
+            fetchOrders(currentPage); // Refresh orders after payment
+        } catch (error) {
+            alert(error.message);
+        }
+    }
 
     return (
         <div className={styles.profile_page_container}>
@@ -158,74 +185,77 @@ export default function ProfilePage() {
                         </button>
                     </div>
                 </div>
-                <div className={styles.orders_section}>
-                    <h2>Your Orders</h2>
-                    {loading ? (
-                        <p>Loading orders...</p>
-                    ) : orders == null || orders.length === 0 ? (
-                        <p>No orders found.</p>
-                    ) : (
-                        <>
-                            <ul className={styles.order_list}>
-                                {orders.map((order) => (
-                                    <li key={order.id} className={styles.order_item}>
-                                        <p>
-                                            <strong>Order ID:</strong> {order.id}
-                                        </p>
-                                        <p>
-                                            <strong>Date:</strong>{' '}
-                                            {new Date(order.orderDate).toLocaleString()}
-                                        </p>
-                                        <p>
-                                            <strong>Paid:</strong> {order.isPaid ? 'Yes' : 'No'}
-                                        </p>
-                                        <h4>Test Results:</h4>
-                                        <ul>
-                                            {order.testResults.map((result) => (
-                                                <li key={result.id}>
-                                                    <p>
-                                                        <strong>Test name:</strong> {result.test.name}
-                                                    </p>
-                                                    <p>
-                                                        <strong>Test description:</strong> {result.test.description}
-                                                    </p>
-                                                    <p>
-                                                        <strong>Test price:</strong> {`${result.test.price.toFixed(2)}$`}
-                                                    </p>
-                                                    <p>
-                                                        <strong>Test date:</strong> {new Date(result.testDate).toLocaleString()}
-                                                    </p>
-                                                    <p>
-                                                        <strong>Result:</strong> {result.result || "No result yet"}
-                                                    </p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className={styles.pagination}>
-                                <button
-                                    onClick={handlePrevPage}
-                                    disabled={currentPage === 0}
-                                    className={styles.page_button}
-                                >
-                                    Previous
-                                </button>
-                                <span>
-                                    Page {currentPage + 1} of {totalPages}
-                                </span>
-                                <button
-                                    onClick={handleNextPage}
-                                    disabled={currentPage === totalPages - 1}
-                                    className={styles.page_button}
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                {userRole === 'PATIENT' &&
+                    <div className={styles.orders_section}>
+                        <h2>Your Orders</h2>
+                        {loading ? (
+                            <p>Loading orders...</p>
+                        ) : orders == null || orders.length === 0 ? (
+                            <p>No orders found.</p>
+                        ) : (
+                            <>
+                                <ul className={styles.order_list}>
+                                    {orders.map((order) => (
+                                        <li key={order.id} className={styles.order_item}>
+                                            <p>
+                                                <strong>Order ID:</strong> {order.id}
+                                            </p>
+                                            <p>
+                                                <strong>Date:</strong>{' '}
+                                                {new Date(order.orderDate).toLocaleString()}
+                                            </p>
+                                            <p>
+                                                <strong>Paid:</strong> {order.paid ? 'Yes' : 'No'}
+                                            </p>
+                                            {!order.paid && <button className={styles.save_button} onClick={() => handlePayForOrder(order.id)}>Pay</button>}
+                                            <h4>Test Results:</h4>
+                                            <ul>
+                                                {order.testResults.map((result) => (
+                                                    <li key={result.id}>
+                                                        <p>
+                                                            <strong>Test name:</strong> {result.test.name}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Test description:</strong> {result.test.description}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Test price:</strong> {`${result.test.price.toFixed(2)}$`}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Test date:</strong> {new Date(result.testDate).toLocaleString()}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Result:</strong> {result.result || "No result yet"}
+                                                        </p>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <div className={styles.pagination}>
+                                    <button
+                                        onClick={handlePrevPage}
+                                        disabled={currentPage === 0}
+                                        className={styles.page_button}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span>
+                                        Page {currentPage + 1} of {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={handleNextPage}
+                                        disabled={currentPage === totalPages - 1}
+                                        className={styles.page_button}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                }
             </main>
             <Footer />
         </div>
