@@ -14,5 +14,5 @@ import java.util.List;
 @Data
 public class CreateOrderRequest {
     @Valid
-    List<TestRequest> tests;
+    List<OrderTestRequest> tests;
 }

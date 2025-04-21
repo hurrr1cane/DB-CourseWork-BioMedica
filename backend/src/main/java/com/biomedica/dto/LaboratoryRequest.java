@@ -22,4 +22,6 @@ public class LaboratoryRequest {
     private String phoneNumber;
 
     private List<UUID> testIds;
+
+    private List<UUID> laboratoryAssistantIds;
 }

@@ -1,9 +1,15 @@
 package com.biomedica.service;
 
-import com.biomedica.dto.*;
+import com.biomedica.dto.LaboratoryDto;
+import com.biomedica.dto.LaboratoryPendingTestsDto;
+import com.biomedica.dto.LaboratoryRequest;
+import com.biomedica.dto.LaboratorySearchDto;
+import com.biomedica.dto.TestResultDto;
 import com.biomedica.dto.mapper.LaboratoryMapper;
 import com.biomedica.entity.Laboratory;
 import com.biomedica.entity.Test;
+import com.biomedica.entity.user.LaboratoryAssistant;
+import com.biomedica.repository.LaboratoryAssistantRepository;
 import com.biomedica.repository.LaboratoryRepository;
 import com.biomedica.repository.TestRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +35,7 @@ import java.util.UUID;
 @Slf4j
 public class LaboratoryService {
     private final LaboratoryRepository laboratoryRepository;
+    private final LaboratoryAssistantRepository laboratoryAssistantRepository;
     private final TestRepository testRepository;
     private final LaboratoryMapper laboratoryMapper;
 
@@ -37,10 +44,20 @@ public class LaboratoryService {
     @Transactional
     public LaboratoryDto createLaboratory(@NonNull LaboratoryRequest laboratoryRequest) {
 
-        List<Test> tests = new ArrayList<>(laboratoryRequest.getTestIds().size());
-        for (UUID testId : laboratoryRequest.getTestIds()) {
-            Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException("Test with was not found"));
-            tests.add(test);
+        List<Test> tests = new ArrayList<>();
+        if (laboratoryRequest.getTestIds() != null) {
+            for (UUID testId : laboratoryRequest.getTestIds()) {
+                Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException("Test with was not found"));
+                tests.add(test);
+            }
+        }
+
+        List<LaboratoryAssistant> laboratoryAssistants = new ArrayList<>();
+        if (laboratoryRequest.getLaboratoryAssistantIds() != null) {
+            for (UUID laboratoryAssistantId : laboratoryRequest.getLaboratoryAssistantIds()) {
+                LaboratoryAssistant laboratoryAssistant = laboratoryAssistantRepository.findById(laboratoryAssistantId).orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant with was not found"));
+                laboratoryAssistants.add(laboratoryAssistant);
+            }
         }
 
         Laboratory laboratory = Laboratory.builder()
@@ -48,6 +65,7 @@ public class LaboratoryService {
                 .phoneNumber(laboratoryRequest.getPhoneNumber())
                 .workingHours(laboratoryRequest.getWorkingHours())
                 .tests(tests)
+                .laboratoryAssistants(laboratoryAssistants)
                 .build();
 
 
@@ -67,14 +85,24 @@ public class LaboratoryService {
         if (laboratoryRequest.getWorkingHours() != null) {
             laboratory.setWorkingHours(laboratoryRequest.getWorkingHours());
         }
+
+        List<Test> tests = new ArrayList<>();
         if (laboratoryRequest.getTestIds() != null) {
-            List<Test> tests = new ArrayList<>(laboratoryRequest.getTestIds().size());
             for (UUID testId : laboratoryRequest.getTestIds()) {
                 Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException("Test with was not found"));
                 tests.add(test);
             }
-            laboratory.setTests(tests);
         }
+        laboratory.setTests(tests);
+
+        List<LaboratoryAssistant> laboratoryAssistants = new ArrayList<>();
+        if (laboratoryRequest.getLaboratoryAssistantIds() != null) {
+            for (UUID laboratoryAssistantId : laboratoryRequest.getLaboratoryAssistantIds()) {
+                LaboratoryAssistant laboratoryAssistant = laboratoryAssistantRepository.findById(laboratoryAssistantId).orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant with was not found"));
+                laboratoryAssistants.add(laboratoryAssistant);
+            }
+        }
+        laboratory.setLaboratoryAssistants(laboratoryAssistants);
 
         return laboratoryMapper.toDto(laboratoryRepository.save(laboratory));
     }
@@ -105,7 +133,6 @@ public class LaboratoryService {
         Page<Laboratory> laboratories = laboratoryRepository.findAll(spec, pageable);
         return laboratories.map(laboratoryMapper::toDto);
     }
-
 
 
     public List<LaboratoryPendingTestsDto> getLaboratoriesWithPendingTests() {
@@ -142,8 +169,6 @@ public class LaboratoryService {
             return Collections.emptyList();
         }
     }
-
-
 
 
 }

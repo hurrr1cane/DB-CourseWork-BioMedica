@@ -26,6 +26,30 @@
     margin-bottom: 1.5rem;
 }
 
+.header_left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.back_button {
+    background: none;
+    border: none;
+    color: #32cd32;
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.back_button:hover {
+    color: #28a428;
+    text-decoration: underline;
+}
+
 .title {
     font-size: 1.75rem;
     margin: 0;
@@ -213,7 +237,7 @@
     background-color: #2a2a2a;
     border-radius: 0.75rem;
     width: 90%;
-    max-width: 700px;
+    max-width: 800px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -273,13 +297,16 @@
 }
 
 .dialog_list_item {
-    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #444;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
 .dialog_list_item:hover {
-    background-color: #3a3a3a;
+    background-color: #2c2c2c;
 }
 
 .dialog_list_item.selected {
@@ -292,6 +319,160 @@
     display: flex;
     justify-content: flex-end;
     border-top: 1px solid #444;
+}
+
+.dialog_section {
+    padding: 1rem 1.5rem;
+}
+
+.dialog_section_title {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.dialog_section_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.dialog_divider {
+    height: 1px;
+    background-color: #444;
+    margin: 0.5rem 0;
+}
+
+.dialog_selected_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dialog_selected_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #444;
+}
+
+.dialog_selected_item:last-child {
+    border-bottom: none;
+}
+
+.remove_button {
+    background-color: #333;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.remove_button:hover {
+    background-color: #ff6b6b;
+    color: #fff;
+}
+
+.add_button {
+    background-color: #333;
+    color: #32cd32;
+    border: 1px solid #32cd32;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.add_button:hover:not(:disabled) {
+    background-color: #32cd32;
+    color: #fff;
+}
+
+.add_button.added {
+    background-color: #32cd32;
+    color: #fff;
+    cursor: default;
+}
+
+.add_button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.dialog_pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+    gap: 1rem;
+}
+
+.page_button {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #32cd32;
+    background-color: transparent;
+    color: #32cd32;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page_button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page_button:hover:not(:disabled) {
+    background-color: rgba(50, 205, 50, 0.1);
+}
+
+.page_info {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.dialog_search {
+    width: 60%;
+}
+
+.search_input {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.search_input:focus {
+    outline: none;
+    border-color: #32cd32;
+}
+
+.item_selection {
+    margin-right: 1rem;
+}
+
+.item_content {
+    flex: 1;
 }
 
 .loading_container {

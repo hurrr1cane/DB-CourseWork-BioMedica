@@ -24,6 +24,13 @@ const LaboratoryPage = () => {
     const [availableAssistants, setAvailableAssistants] = useState([]);
     const [selectedAssistants, setSelectedAssistants] = useState([]);
 
+    // New states for test search and pagination
+    const [testSearchQuery, setTestSearchQuery] = useState('');
+    const [testsPage, setTestsPage] = useState(0);
+    const [testsPageSize, setTestsPageSize] = useState(5);
+    const [totalTestPages, setTotalTestPages] = useState(0);
+    const [totalTestCount, setTotalTestCount] = useState(0);
+
     useEffect(() => {
         const fetchLaboratory = async () => {
             try {
@@ -71,8 +78,21 @@ const LaboratoryPage = () => {
         // Fetch available tests for the dialog
         const fetchTests = async () => {
             try {
-                const response = await axios.get('/api/tests');
-                setAvailableTests(response.data);
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(
+                    `${api}admin/tests?page=${testsPage}&size=${testsPageSize}&sort=name,asc${
+                        testSearchQuery ? `&name=${encodeURIComponent(testSearchQuery)}` : ''
+                    }`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                const data = await response.json();
+                setAvailableTests(data.content || []);
+                setTotalTestPages(data.totalPages || 0);
+                setTotalTestCount(data.totalElements || 0);
             } catch (err) {
                 console.error('Failed to fetch tests', err);
             }
@@ -95,7 +115,7 @@ const LaboratoryPage = () => {
         if (assistantsDialogOpen) {
             fetchAssistants();
         }
-    }, [testsDialogOpen, assistantsDialogOpen]);
+    }, [testsDialogOpen, assistantsDialogOpen, testsPage, testsPageSize, testSearchQuery]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -107,11 +127,19 @@ const LaboratoryPage = () => {
 
     const handleSave = async () => {
         try {
+            // Extract IDs from selected tests and assistants
+            const testIds = selectedTests.map(test => test.id);
+            const assistantIds = selectedAssistants.map(assistant => assistant.id);
+            
             const laboratoryToSave = {
                 ...editedLaboratory,
-                tests: selectedTests,
-                laboratoryAssistants: selectedAssistants
+                testIds: testIds,
+                laboratoryAssistantIds: assistantIds
             };
+            
+            // Remove the full objects as they aren't needed in the request
+            delete laboratoryToSave.tests;
+            delete laboratoryToSave.laboratoryAssistants;
 
             const token = localStorage.getItem('accessToken');
 
@@ -125,7 +153,6 @@ const LaboratoryPage = () => {
                     },
                     body: JSON.stringify(laboratoryToSave),
                 });
-
             } else {
                 response = await fetch(`${api}admin/laboratories/${id}`, {
                     method: 'PATCH',
@@ -137,14 +164,20 @@ const LaboratoryPage = () => {
                 });
             }
 
-            setLaboratory(response.data);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save laboratory');
+            }
+
+            const data = await response.json();
+            setLaboratory(data);
             setEditing(false);
             if (id === 'new') {
-                navigate(`/laboratories/${response.data.id}`);
+                navigate(`/laboratories/${data.id}`);
             }
         } catch (err) {
             console.error('Failed to save laboratory', err);
-            setError('Failed to save laboratory details');
+            setError(err.message || 'Failed to save laboratory details');
         }
     };
 
@@ -177,6 +210,23 @@ const LaboratoryPage = () => {
         }
     };
 
+    const handleTestSearchChange = (e) => {
+        setTestSearchQuery(e.target.value);
+        setTestsPage(0); // Reset to first page when searching
+    };
+
+    const handlePreviousTestsPage = () => {
+        if (testsPage > 0) {
+            setTestsPage(testsPage - 1);
+        }
+    };
+
+    const handleNextTestsPage = () => {
+        if (testsPage < totalTestPages - 1) {
+            setTestsPage(testsPage + 1);
+        }
+    };
+
     if (loading) {
         return (
             <div className={styles.loading_container}>
@@ -202,9 +252,17 @@ const LaboratoryPage = () => {
         <div className={styles.container}>
             <div className={styles.paper}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>
-                        {id === 'new' ? 'New Laboratory' : 'Laboratory Details'}
-                    </h2>
+                    <div className={styles.header_left}>
+                        <button 
+                            className={styles.back_button} 
+                            onClick={() => navigate('/laboratories')}
+                        >
+                            ← Back to Laboratories
+                        </button>
+                        <h2 className={styles.title}>
+                            {id === 'new' ? 'New Laboratory' : 'Laboratory Details'}
+                        </h2>
+                    </div>
                     <div className={styles.actions}>
                         {!editing && (
                             <button className={styles.button} onClick={() => setEditing(true)}>
@@ -232,19 +290,20 @@ const LaboratoryPage = () => {
                             <div className={styles.card_content}>
                                 <h3 className={styles.section_title}>Basic Information</h3>
 
-                                <div className={styles.form_field}>
-                                    <label htmlFor="id">ID</label>
-                                    <input
-                                        id="id"
-                                        name="id"
-                                        type="text"
-                                        value={editedLaboratory?.id || ''}
-                                        onChange={handleInputChange}
-                                        disabled={id !== 'new' || !editing}
-                                        className={styles.input}
-                                    />
-                                    {id !== 'new' && <p className={styles.helper_text}>ID cannot be changed</p>}
-                                </div>
+                                {id !== 'new' ? (
+                                    <div className={styles.form_field}>
+                                        <label htmlFor="id">ID</label>
+                                        <input
+                                            id="id"
+                                            name="id"
+                                            type="text"
+                                            value={editedLaboratory?.id || ''}
+                                            className={styles.input}
+                                            disabled={true}
+                                        />
+                                        <p className={styles.helper_text}>ID is automatically assigned and cannot be changed</p>
+                                    </div>
+                                ) : null}  {/* Don't show ID field at all for new laboratory */}
 
                                 <div className={styles.form_field}>
                                     <label htmlFor="address">Address</label>
@@ -314,7 +373,8 @@ const LaboratoryPage = () => {
                                         {selectedTests.map((test) => (
                                             <li key={test.id} className={styles.list_item}>
                                                 <div className={styles.item_primary}>{test.name}</div>
-                                                <div className={styles.item_secondary}>Code: {test.code} | Price: ${Number(test.price).toFixed(2)}</div>
+                                                <div className={styles.item_secondary}>Description: {test.description}</div>
+                                                <div className={styles.item_secondary}> Price: ${Number(test.price).toFixed(2)}</div>
                                             </li>
                                         ))}
                                     </ul>
@@ -362,24 +422,125 @@ const LaboratoryPage = () => {
                             <h3 className={styles.dialog_title}>Manage Laboratory Tests</h3>
                             <button className={styles.close_button} onClick={() => setTestsDialogOpen(false)}>×</button>
                         </div>
-                        <div className={styles.dialog_content}>
-                            <ul className={styles.dialog_list}>
-                                {availableTests.map((test) => {
-                                    const isSelected = selectedTests.some(t => t.id === test.id);
-                                    return (
-                                        <li
-                                            key={test.id}
-                                            className={`${styles.dialog_list_item} ${isSelected ? styles.selected : ''}`}
-                                            onClick={() => handleTestSelection(test)}
-                                        >
-                                            <div className={styles.item_primary}>{test.name}</div>
-                                            <div className={styles.item_secondary}>Code: {test.code} | Price: ${Number(test.price).toFixed(2)}</div>
+                        
+                        {/* Selected tests section */}
+                        <div className={styles.dialog_section}>
+                            <h4 className={styles.dialog_section_title}>Selected Tests</h4>
+                            {selectedTests.length === 0 ? (
+                                <p className={styles.empty_message}>No tests selected for this laboratory</p>
+                            ) : (
+                                <ul className={styles.dialog_selected_list}>
+                                    {selectedTests.map((test) => (
+                                        <li key={test.id} className={styles.dialog_selected_item}>
+                                            <div className={styles.item_content}>
+                                                <div className={styles.item_primary}>{test.name}</div>
+                                                <div className={styles.item_secondary}>
+                                                    {test.code && `Code: ${test.code} | `}
+                                                    Price: ${Number(test.price).toFixed(2)}
+                                                </div>
+                                            </div>
+                                            <button 
+                                                className={styles.remove_button} 
+                                                onClick={() => handleTestSelection(test)}
+                                                title="Remove from laboratory"
+                                            >
+                                                ✕
+                                            </button>
                                         </li>
-                                    );
-                                })}
-                            </ul>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
+                        
+                        <div className={styles.dialog_divider}></div>
+                        
+                        {/* Available tests section */}
+                        <div className={styles.dialog_section}>
+                            <div className={styles.dialog_section_header}>
+                                <h4 className={styles.dialog_section_title}>Available Tests</h4>
+                                <div className={styles.dialog_search}>
+                                    <input
+                                        type="text"
+                                        placeholder="Search tests..."
+                                        value={testSearchQuery}
+                                        onChange={handleTestSearchChange}
+                                        className={styles.search_input}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className={styles.dialog_content}>
+                                {availableTests.length === 0 ? (
+                                    <p className={styles.empty_message}>
+                                        {testSearchQuery ? "No tests match your search" : "No tests available"}
+                                    </p>
+                                ) : (
+                                    <ul className={styles.dialog_list}>
+                                        {availableTests.map((test) => {
+                                            const isSelected = selectedTests.some(t => t.id === test.id);
+                                            return (
+                                                <li
+                                                    key={test.id}
+                                                    className={`${styles.dialog_list_item} ${isSelected ? styles.selected : ''}`}
+                                                    onClick={() => !isSelected && handleTestSelection(test)}
+                                                >
+                                                    <div className={styles.item_selection}>
+                                                        <button
+                                                            className={`${styles.add_button} ${isSelected ? styles.added : ''}`}
+                                                            disabled={isSelected}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (!isSelected) handleTestSelection(test);
+                                                            }}
+                                                            title={isSelected ? "Already added" : "Add to laboratory"}
+                                                        >
+                                                            {isSelected ? '✓' : '+'}
+                                                        </button>
+                                                    </div>
+                                                    <div className={styles.item_content}>
+                                                        <div className={styles.item_primary}>{test.name}</div>
+                                                        <div className={styles.item_secondary}>
+                                                            {test.code && `Code: ${test.code} | `}
+                                                            Price: ${Number(test.price).toFixed(2)}
+                                                        </div>
+                                                        {test.description && (
+                                                            <div className={styles.item_description}>{test.description}</div>
+                                                        )}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                )}
+                            </div>
+                            
+                            {/* Pagination controls */}
+                            <div className={styles.dialog_pagination}>
+                                <button 
+                                    className={styles.page_button}
+                                    onClick={handlePreviousTestsPage}
+                                    disabled={testsPage === 0}
+                                >
+                                    Previous
+                                </button>
+                                <span className={styles.page_info}>
+                                    Page {testsPage + 1} of {totalTestPages || 1} 
+                                    ({totalTestCount} total)
+                                </span>
+                                <button 
+                                    className={styles.page_button}
+                                    onClick={handleNextTestsPage}
+                                    disabled={testsPage >= totalTestPages - 1}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div className={styles.dialog_actions}>
+                            <div className={styles.dialog_info}>
+                                <span>{selectedTests.length} tests selected</span>
+                            </div>
                             <button className={styles.button} onClick={() => setTestsDialogOpen(false)}>Done</button>
                         </div>
                     </div>

@@ -5,9 +5,12 @@ import com.biomedica.dto.validation.PatchValidation;
 import com.biomedica.dto.validation.PostValidation;
 import com.biomedica.service.AdminService;
 import com.biomedica.service.LaboratoryService;
+import com.biomedica.service.TestService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final LaboratoryService laboratoryService;
+    private final TestService testService;
 
     /**
      * * Endpoint to register a new laboratory assistant.
@@ -58,6 +62,35 @@ public class AdminController {
     @GetMapping("/laboratories/{laboratoryId}/pending-tests")
     public List<TestResultDto> getPendingTestsByLab(@PathVariable UUID laboratoryId) {
         return laboratoryService.getPendingTestsByLab(laboratoryId);
+    }
+
+    @GetMapping("/tests")
+    public ResponseEntity<Page<TestDto>> getTests(
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(testService.getTests(pageable));
+    }
+
+    @GetMapping("/tests/{testId}")
+    public ResponseEntity<TestDto> getTestById(
+            @PathVariable UUID testId
+    ) {
+        return ResponseEntity.ok(testService.getTest(testId));
+    }
+
+    @PostMapping("/tests")
+    public ResponseEntity<TestDto> createTest(
+            @RequestBody @Validated(PostValidation.class) TestRequest testRequest
+    ) {
+        return ResponseEntity.ok(testService.createTest(testRequest));
+    }
+
+    @PatchMapping("/tests/{testId}")
+    public ResponseEntity<TestDto> updateTest(
+            @PathVariable UUID testId,
+            @RequestBody @Validated(PatchValidation.class) TestRequest testRequest
+    ) {
+        return ResponseEntity.ok(testService.updateTest(testId, testRequest));
     }
 
 }
