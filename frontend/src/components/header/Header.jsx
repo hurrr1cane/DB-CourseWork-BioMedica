@@ -17,6 +17,9 @@ export default function Header() {
                 {!(userRole === "ADMINISTRATOR" || userRole === "LABORATORY_ASSISTANT") && <NavLink to="/make-order" className={styles.order_button}>
                     Make Order
                 </NavLink> }
+                {userRole === "ADMINISTRATOR" && <NavLink to="/assistants" className={styles.nav_link}>
+                    Assistants
+                </NavLink>}
                 {userRole === "ADMINISTRATOR" && <NavLink to="/laboratories" className={styles.nav_link}>
                     Laboratories
                 </NavLink>}

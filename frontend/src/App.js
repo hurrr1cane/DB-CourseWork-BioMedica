@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import LaboratoriesPage from './pages/LaboratoriesPage';
 import LaboratoryPage from './pages/LaboratoryPage';
+import AssistantsPage from './pages/AssistantsPage';
+import AssistantDetailPage from './pages/AssistantDetailPage';
 
 const router = createBrowserRouter(
   [
@@ -14,7 +16,8 @@ const router = createBrowserRouter(
     { path: '/profile', element: <ProfilePage /> },
     { path: '/laboratories', element: <LaboratoriesPage /> },
     { path: '/laboratories/edit/:id', element: <LaboratoryPage /> },
-
+    { path: '/assistants', element: <AssistantsPage /> },
+    { path: '/assistants/:id', element: <AssistantDetailPage /> },
   ]
 )
 

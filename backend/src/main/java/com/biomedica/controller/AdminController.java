@@ -30,13 +30,37 @@ public class AdminController {
     private final TestService testService;
 
     /**
-     * * Endpoint to register a new laboratory assistant.
+     * Endpoint to register a new laboratory assistant.
      * @param registerLabAssistantRequest The request body containing the details of the laboratory assistant to be registered.
      * @return A ResponseEntity containing the registered laboratory assistant's details.
      */
-    @PostMapping("/register-lab-assistant")
-    public ResponseEntity<UserDto> registerLabAssistant(@RequestBody @Valid RegisterLabAssistantRequest registerLabAssistantRequest) {
+    @PostMapping("/laboratory-assistants")
+    public ResponseEntity<LaboratoryAssistantDto> registerLabAssistant(@RequestBody @Valid RegisterLabAssistantRequest registerLabAssistantRequest) {
         return ResponseEntity.ok(adminService.registerLabAssistant(registerLabAssistantRequest));
+    }
+
+    @GetMapping("/laboratory-assistants")
+    public ResponseEntity<Page<LaboratoryAssistantDto>> getLaboratoryAssistants(Pageable pageable) {
+        return ResponseEntity.ok(adminService.getLaboratoryAssistants(pageable));
+    }
+
+    @GetMapping("/laboratory-assistants/{laboratoryAssistantId}")
+    public ResponseEntity<LaboratoryAssistantDto> getLaboratoryAssistantById(@PathVariable UUID laboratoryAssistantId) {
+        return ResponseEntity.ok(adminService.getLaboratoryAssistantById(laboratoryAssistantId));
+    }
+
+    @PutMapping("/laboratory-assistants/{laboratoryAssistantId}")
+    public ResponseEntity<LaboratoryAssistantDto> editLaboratoryAssistant(
+            @PathVariable UUID laboratoryAssistantId,
+            @RequestBody @Validated(PatchValidation.class) RegisterLabAssistantRequest registerLabAssistantRequest
+    ) {
+        return ResponseEntity.ok(adminService.updateLaboratoryAssistant(laboratoryAssistantId, registerLabAssistantRequest));
+    }
+
+    @DeleteMapping("/laboratory-assistants/{laboratoryAssistantId}")
+    public ResponseEntity<Void> deleteLaboratoryAssistant(@PathVariable UUID laboratoryAssistantId) {
+        adminService.deleteLaboratoryAssistant(laboratoryAssistantId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/laboratories")

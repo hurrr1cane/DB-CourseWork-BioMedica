@@ -21,6 +21,8 @@ import java.util.List;
 @Table(name = "laboratory_assistant")
 public class LaboratoryAssistant extends User {
 
+    private String phoneNumber;
+
     public LaboratoryAssistant() {
         super.setRole(Role.LABORATORY_ASSISTANT);
     }

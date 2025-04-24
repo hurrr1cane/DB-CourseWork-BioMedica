@@ -21,6 +21,7 @@ public class LaboratoryAssistantMapper {
                 .id(laboratoryAssistant.getId())
                 .firstName(laboratoryAssistant.getName())
                 .lastName(laboratoryAssistant.getSurname())
+                .phoneNumber(laboratoryAssistant.getPhoneNumber())
                 .email(laboratoryAssistant.getEmail())
                 .laboratoryId(laboratoryAssistant.getLaboratory() != null ?
                         laboratoryAssistant.getLaboratory().getId() : null)
