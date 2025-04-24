@@ -23,6 +23,11 @@ const LaboratoryPage = () => {
     const [assistantsDialogOpen, setAssistantsDialogOpen] = useState(false);
     const [availableAssistants, setAvailableAssistants] = useState([]);
     const [selectedAssistants, setSelectedAssistants] = useState([]);
+    const [assistantSearchQuery, setAssistantSearchQuery] = useState('');
+    const [assistantsPage, setAssistantsPage] = useState(0);
+    const [assistantsPageSize, setAssistantsPageSize] = useState(5);
+    const [totalAssistantPages, setTotalAssistantPages] = useState(0);
+    const [totalAssistantCount, setTotalAssistantCount] = useState(0);
 
     // New states for test search and pagination
     const [testSearchQuery, setTestSearchQuery] = useState('');
@@ -35,13 +40,20 @@ const LaboratoryPage = () => {
         const fetchLaboratory = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${api}laboratories/${id}`);
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(`${api}admin/laboratories/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
                 const data = await response.json();
 
                 setLaboratory(data);
                 setEditedLaboratory(data);
                 setSelectedTests(data.tests || []);
-                setSelectedAssistants(data.laboratoryAssistants || []);
+                setSelectedAssistants(data.assistants || []);
             } catch (err) {
                 setError('Failed to fetch laboratory details');
                 console.error(err);
@@ -101,8 +113,21 @@ const LaboratoryPage = () => {
         // Fetch available laboratory assistants for the dialog
         const fetchAssistants = async () => {
             try {
-                const response = await axios.get('/api/laboratory-assistants');
-                setAvailableAssistants(response.data);
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(
+                    `${api}admin/laboratory-assistants?page=${assistantsPage}&size=${assistantsPageSize}&sort=surname,asc${
+                        assistantSearchQuery ? `&lastName=${encodeURIComponent(assistantSearchQuery)}` : ''
+                    }`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+                const data = await response.json();
+                setAvailableAssistants(data.content || []);
+                setTotalAssistantPages(data.totalPages || 0);
+                setTotalAssistantCount(data.totalElements || 0);
             } catch (err) {
                 console.error('Failed to fetch laboratory assistants', err);
             }
@@ -115,7 +140,8 @@ const LaboratoryPage = () => {
         if (assistantsDialogOpen) {
             fetchAssistants();
         }
-    }, [testsDialogOpen, assistantsDialogOpen, testsPage, testsPageSize, testSearchQuery]);
+    }, [testsDialogOpen, assistantsDialogOpen, testsPage, testsPageSize, testSearchQuery, 
+        assistantsPage, assistantsPageSize, assistantSearchQuery]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -187,7 +213,7 @@ const LaboratoryPage = () => {
         } else {
             setEditedLaboratory(laboratory);
             setSelectedTests(laboratory.tests || []);
-            setSelectedAssistants(laboratory.laboratoryAssistants || []);
+            setSelectedAssistants(laboratory.фssistants || []);
             setEditing(false);
         }
     };
@@ -224,6 +250,18 @@ const LaboratoryPage = () => {
     const handleNextTestsPage = () => {
         if (testsPage < totalTestPages - 1) {
             setTestsPage(testsPage + 1);
+        }
+    };
+
+    const handlePreviousAssistantsPage = () => {
+        if (assistantsPage > 0) {
+            setAssistantsPage(assistantsPage - 1);
+        }
+    };
+
+    const handleNextAssistantsPage = () => {
+        if (assistantsPage < totalAssistantPages - 1) {
+            setAssistantsPage(assistantsPage + 1);
         }
     };
 
@@ -556,21 +594,72 @@ const LaboratoryPage = () => {
                             <button className={styles.close_button} onClick={() => setAssistantsDialogOpen(false)}>×</button>
                         </div>
                         <div className={styles.dialog_content}>
+                            <div className={styles.dialog_section_header}>
+                                <h4 className={styles.dialog_section_title}>Available Assistants</h4>
+                            </div>
                             <ul className={styles.dialog_list}>
                                 {availableAssistants.map((assistant) => {
                                     const isSelected = selectedAssistants.some(a => a.id === assistant.id);
+                                    const isAssignedElsewhere = assistant.laboratoryId && 
+                                        (!editedLaboratory?.id || assistant.laboratoryId !== editedLaboratory.id);
+                                    
                                     return (
                                         <li
                                             key={assistant.id}
                                             className={`${styles.dialog_list_item} ${isSelected ? styles.selected : ''}`}
-                                            onClick={() => handleAssistantSelection(assistant)}
+                                            onClick={() => !isSelected && handleAssistantSelection(assistant)}
                                         >
-                                            <div className={styles.item_primary}>{assistant.firstName} {assistant.lastName}</div>
-                                            <div className={styles.item_secondary}>{assistant.email}</div>
+                                            <div className={styles.item_selection}>
+                                                <button
+                                                    className={`${styles.add_button} ${isSelected ? styles.added : ''}`}
+                                                    disabled={isSelected}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (!isSelected) handleAssistantSelection(assistant);
+                                                    }}
+                                                    title={isSelected ? "Already assigned" : "Add to laboratory"}
+                                                >
+                                                    {isSelected ? '✓' : '+'}
+                                                </button>
+                                            </div>
+                                            <div className={styles.item_avatar}>
+                                                {assistant.firstName.charAt(0)}{assistant.lastName.charAt(0)}
+                                            </div>
+                                            <div className={styles.item_content}>
+                                                <div className={styles.item_primary_container}>
+                                                    <div className={styles.item_primary}>{assistant.firstName} {assistant.lastName}</div>
+                                                    {isAssignedElsewhere && (
+                                                        <div className={styles.assignment_badge} title="Currently assigned to another laboratory">
+                                                            Assigned elsewhere
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className={styles.item_secondary}>{assistant.email}</div>
+                                            </div>
                                         </li>
                                     );
                                 })}
                             </ul>
+                            <div className={styles.dialog_pagination}>
+                                <button 
+                                    className={styles.page_button}
+                                    onClick={handlePreviousAssistantsPage}
+                                    disabled={assistantsPage === 0}
+                                >
+                                    Previous
+                                </button>
+                                <span className={styles.page_info}>
+                                    Page {assistantsPage + 1} of {totalAssistantPages || 1} 
+                                    ({totalAssistantCount} total)
+                                </span>
+                                <button 
+                                    className={styles.page_button}
+                                    onClick={handleNextAssistantsPage}
+                                    disabled={assistantsPage >= totalAssistantPages - 1}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                         <div className={styles.dialog_actions}>
                             <button className={styles.button} onClick={() => setAssistantsDialogOpen(false)}>Done</button>

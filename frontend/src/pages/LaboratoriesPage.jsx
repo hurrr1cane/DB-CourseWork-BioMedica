@@ -7,7 +7,7 @@ import { ro } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 
 export default function LaboratoriesPage() {
-    const api = "http://localhost:8080/api/laboratories";
+    const api = "http://localhost:8080/api/admin/laboratories";
 
     const [laboratories, setLaboratories] = useState([]);
     const [currentPage, setCurrentPage] = useState(0); // Current page number (starts from 0)
@@ -18,8 +18,14 @@ export default function LaboratoriesPage() {
 
     const fetchData = async (page) => {
         setLoading(true);
+        const token = localStorage.getItem('accessToken');
         try {
-            const response = await fetch(`${api}?page=${page}&size=10`); // Fetch paginated data
+            const response = await fetch(`${api}?page=${page}&size=10`, 
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }); // Fetch paginated data
             const data = await response.json();
             setLaboratories(data.content); // Set laboratories from the content
             setTotalPages(data.totalPages); // Set total number of pages

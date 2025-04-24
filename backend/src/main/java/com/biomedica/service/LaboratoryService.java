@@ -1,5 +1,6 @@
 package com.biomedica.service;
 
+import com.biomedica.dto.LaboratoryAdminDto;
 import com.biomedica.dto.LaboratoryDto;
 import com.biomedica.dto.LaboratoryPendingTestsDto;
 import com.biomedica.dto.LaboratoryRequest;
@@ -12,6 +13,7 @@ import com.biomedica.entity.user.LaboratoryAssistant;
 import com.biomedica.repository.LaboratoryAssistantRepository;
 import com.biomedica.repository.LaboratoryRepository;
 import com.biomedica.repository.TestRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -38,11 +40,12 @@ public class LaboratoryService {
     private final LaboratoryAssistantRepository laboratoryAssistantRepository;
     private final TestRepository testRepository;
     private final LaboratoryMapper laboratoryMapper;
+    private final EntityManager entityManager;
 
     private final JdbcTemplate jdbcTemplate;
 
     @Transactional
-    public LaboratoryDto createLaboratory(@NonNull LaboratoryRequest laboratoryRequest) {
+    public LaboratoryAdminDto createLaboratory(@NonNull LaboratoryRequest laboratoryRequest) {
 
         List<Test> tests = new ArrayList<>();
         if (laboratoryRequest.getTestIds() != null) {
@@ -69,12 +72,13 @@ public class LaboratoryService {
                 .build();
 
 
-        return laboratoryMapper.toDto(laboratoryRepository.save(laboratory));
+        return laboratoryMapper.toAdminDto(laboratoryRepository.save(laboratory));
     }
 
     @Transactional
-    public LaboratoryDto editLaboratory(UUID laboratoryId, LaboratoryRequest laboratoryRequest) {
-        Laboratory laboratory = laboratoryRepository.findById(laboratoryId).orElseThrow(() -> new EntityNotFoundException("Laboratory was not found"));
+    public LaboratoryAdminDto editLaboratory(UUID laboratoryId, LaboratoryRequest laboratoryRequest) {
+        Laboratory laboratory = laboratoryRepository.findById(laboratoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Laboratory was not found"));
 
         if (laboratoryRequest.getAddress() != null) {
             laboratory.setAddress(laboratoryRequest.getAddress());
@@ -86,34 +90,76 @@ public class LaboratoryService {
             laboratory.setWorkingHours(laboratoryRequest.getWorkingHours());
         }
 
-        List<Test> tests = new ArrayList<>();
+        // Handle tests relationship
         if (laboratoryRequest.getTestIds() != null) {
+            // First, remove the laboratory from tests that are no longer associated
+            for (Test test : new ArrayList<>(laboratory.getTests())) {
+                if (!laboratoryRequest.getTestIds().contains(test.getId())) {
+                    test.getLaboratories().remove(laboratory);
+                    laboratory.getTests().remove(test);
+                }
+            }
+
+            // Add new tests not already in the list
             for (UUID testId : laboratoryRequest.getTestIds()) {
-                Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException("Test with was not found"));
-                tests.add(test);
+                Test test = testRepository.findById(testId)
+                        .orElseThrow(() -> new EntityNotFoundException("Test with id " + testId + " was not found"));
+
+                if (!laboratory.getTests().contains(test)) {
+                    laboratory.getTests().add(test);
+                    test.getLaboratories().add(laboratory);
+                }
             }
         }
-        laboratory.setTests(tests);
 
-        List<LaboratoryAssistant> laboratoryAssistants = new ArrayList<>();
+        // Handle laboratory assistants relationship
         if (laboratoryRequest.getLaboratoryAssistantIds() != null) {
-            for (UUID laboratoryAssistantId : laboratoryRequest.getLaboratoryAssistantIds()) {
-                LaboratoryAssistant laboratoryAssistant = laboratoryAssistantRepository.findById(laboratoryAssistantId).orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant with was not found"));
-                laboratoryAssistants.add(laboratoryAssistant);
+            // First, update assistants that are no longer associated
+            for (LaboratoryAssistant assistant : new ArrayList<>(laboratory.getLaboratoryAssistants())) {
+                if (!laboratoryRequest.getLaboratoryAssistantIds().contains(assistant.getId())) {
+                    assistant.setLaboratory(null);
+                    laboratory.getLaboratoryAssistants().remove(assistant);
+                }
+            }
+
+            // Add new laboratory assistants not already in the list
+            for (UUID assistantId : laboratoryRequest.getLaboratoryAssistantIds()) {
+                LaboratoryAssistant assistant = laboratoryAssistantRepository.findById(assistantId)
+                        .orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant with id " + assistantId + " was not found"));
+
+                if (!laboratory.getLaboratoryAssistants().contains(assistant)) {
+                    laboratory.getLaboratoryAssistants().add(assistant);
+                    assistant.setLaboratory(laboratory);
+                    log.info("Laboratory Assistant with id {} was added to laboratory with id {}", assistantId, laboratoryId);
+                }
             }
         }
-        laboratory.setLaboratoryAssistants(laboratoryAssistants);
 
-        return laboratoryMapper.toDto(laboratoryRepository.save(laboratory));
+        // Explicitly flush changes to ensure they're persisted
+        laboratoryRepository.saveAndFlush(laboratory);
+
+        // Refresh the entity to ensure we have the latest state
+        entityManager.refresh(laboratory);
+
+        return laboratoryMapper.toAdminDto(laboratory);
     }
 
     public Page<LaboratoryDto> getLaboratories(Pageable pageable) {
         return laboratoryRepository.findAll(pageable).map(laboratoryMapper::toDto);
     }
 
+    public Page<LaboratoryAdminDto> getAdminLaboratories(Pageable pageable) {
+        return laboratoryRepository.findAll(pageable).map(laboratoryMapper::toAdminDto);
+    }
+
     public LaboratoryDto getLaboratoryById(UUID laboratoryId) {
         Laboratory laboratory = laboratoryRepository.findById(laboratoryId).orElseThrow(() -> new EntityNotFoundException("Laboratory was not found"));
         return laboratoryMapper.toDto(laboratory);
+    }
+
+    public LaboratoryAdminDto getAdminLaboratoryById(UUID laboratoryId) {
+        Laboratory laboratory = laboratoryRepository.findById(laboratoryId).orElseThrow(() -> new EntityNotFoundException("Laboratory was not found"));
+        return laboratoryMapper.toAdminDto(laboratory);
     }
 
     public Page<LaboratoryDto> getLaboratoriesWithFilters(LaboratorySearchDto searchDto, Pageable pageable) {

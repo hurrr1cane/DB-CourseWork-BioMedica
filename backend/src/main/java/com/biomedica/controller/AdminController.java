@@ -63,15 +63,25 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/laboratories")
+    public ResponseEntity<Page<LaboratoryAdminDto>> getLaboratories(Pageable pageable) {
+        return ResponseEntity.ok(laboratoryService.getAdminLaboratories(pageable));
+    }
+
+    @GetMapping("/laboratories/{laboratoryId}")
+    public ResponseEntity<LaboratoryAdminDto> getLaboratoryById(@PathVariable UUID laboratoryId) {
+        return ResponseEntity.ok(laboratoryService.getAdminLaboratoryById(laboratoryId));
+    }
+
     @PostMapping("/laboratories")
-    public ResponseEntity<LaboratoryDto> createLaboratory(
+    public ResponseEntity<LaboratoryAdminDto> createLaboratory(
             @RequestBody @Validated(PostValidation.class) LaboratoryRequest laboratoryRequest
             ) {
         return ResponseEntity.ok(laboratoryService.createLaboratory(laboratoryRequest));
     }
 
     @PatchMapping("/laboratories/{laboratoryId}")
-    public ResponseEntity<LaboratoryDto> editLaboratory(
+    public ResponseEntity<LaboratoryAdminDto> editLaboratory(
             @PathVariable UUID laboratoryId,
             @RequestBody @Validated(PatchValidation.class) LaboratoryRequest laboratoryRequest
     ) {
