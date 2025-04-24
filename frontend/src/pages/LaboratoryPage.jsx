@@ -199,7 +199,7 @@ const LaboratoryPage = () => {
             setLaboratory(data);
             setEditing(false);
             if (id === 'new') {
-                navigate(`/laboratories/${data.id}`);
+                navigate(`/laboratories/edit/${data.id}`);
             }
         } catch (err) {
             console.error('Failed to save laboratory', err);
@@ -234,11 +234,6 @@ const LaboratoryPage = () => {
         } else {
             setSelectedAssistants([...selectedAssistants, assistant]);
         }
-    };
-
-    const handleTestSearchChange = (e) => {
-        setTestSearchQuery(e.target.value);
-        setTestsPage(0); // Reset to first page when searching
     };
 
     const handlePreviousTestsPage = () => {
@@ -496,15 +491,6 @@ const LaboratoryPage = () => {
                         <div className={styles.dialog_section}>
                             <div className={styles.dialog_section_header}>
                                 <h4 className={styles.dialog_section_title}>Available Tests</h4>
-                                <div className={styles.dialog_search}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search tests..."
-                                        value={testSearchQuery}
-                                        onChange={handleTestSearchChange}
-                                        className={styles.search_input}
-                                    />
-                                </div>
                             </div>
                             
                             <div className={styles.dialog_content}>

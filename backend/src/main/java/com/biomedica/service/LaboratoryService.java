@@ -46,33 +46,42 @@ public class LaboratoryService {
 
     @Transactional
     public LaboratoryAdminDto createLaboratory(@NonNull LaboratoryRequest laboratoryRequest) {
-
-        List<Test> tests = new ArrayList<>();
-        if (laboratoryRequest.getTestIds() != null) {
-            for (UUID testId : laboratoryRequest.getTestIds()) {
-                Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException("Test with was not found"));
-                tests.add(test);
-            }
-        }
-
-        List<LaboratoryAssistant> laboratoryAssistants = new ArrayList<>();
-        if (laboratoryRequest.getLaboratoryAssistantIds() != null) {
-            for (UUID laboratoryAssistantId : laboratoryRequest.getLaboratoryAssistantIds()) {
-                LaboratoryAssistant laboratoryAssistant = laboratoryAssistantRepository.findById(laboratoryAssistantId).orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant with was not found"));
-                laboratoryAssistants.add(laboratoryAssistant);
-            }
-        }
-
+        // Create the laboratory first with basic information
         Laboratory laboratory = Laboratory.builder()
                 .address(laboratoryRequest.getAddress())
                 .phoneNumber(laboratoryRequest.getPhoneNumber())
                 .workingHours(laboratoryRequest.getWorkingHours())
-                .tests(tests)
-                .laboratoryAssistants(laboratoryAssistants)
+                .tests(new ArrayList<>())
+                .laboratoryAssistants(new ArrayList<>())
                 .build();
 
+        // Save the laboratory to get its ID
+        laboratory = laboratoryRepository.saveAndFlush(laboratory);
 
-        return laboratoryMapper.toAdminDto(laboratoryRepository.save(laboratory));
+        // Add tests with proper bidirectional relationship
+        if (laboratoryRequest.getTestIds() != null) {
+            for (UUID testId : laboratoryRequest.getTestIds()) {
+                Test test = testRepository.findById(testId)
+                        .orElseThrow(() -> new EntityNotFoundException("Test with id " + testId + " was not found"));
+                laboratory.getTests().add(test);
+                test.getLaboratories().add(laboratory);
+            }
+        }
+
+        // Add laboratory assistants with proper bidirectional relationship
+        if (laboratoryRequest.getLaboratoryAssistantIds() != null) {
+            for (UUID assistantId : laboratoryRequest.getLaboratoryAssistantIds()) {
+                LaboratoryAssistant assistant = laboratoryAssistantRepository.findById(assistantId)
+                        .orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant with id " + assistantId + " was not found"));
+                laboratory.getLaboratoryAssistants().add(assistant);
+                assistant.setLaboratory(laboratory);
+            }
+        }
+
+        // Save everything again to ensure relationships are persisted
+        laboratory = laboratoryRepository.saveAndFlush(laboratory);
+
+        return laboratoryMapper.toAdminDto(laboratory);
     }
 
     @Transactional
