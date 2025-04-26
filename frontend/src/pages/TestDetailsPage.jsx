@@ -13,7 +13,9 @@ export default function TestDetails() {
     const [resultData, setResultData] = useState('');
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [canceling, setCanceling] = useState(false);
     const [error, setError] = useState(null);
+    const [cancelError, setCancelError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
 
     useEffect(() => {
@@ -82,6 +84,9 @@ export default function TestDetails() {
     };
 
     const handleCancel = async () => {
+        setCanceling(true);
+        setCancelError(null);
+        
         try {
             const token = localStorage.getItem('accessToken');
             const response = await fetch(`${api}/test-results/${id}/cancel`, {
@@ -92,13 +97,22 @@ export default function TestDetails() {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to cancel participation');
+                // Parse the error response
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to cancel participation');
             }
             
-            navigate('/tests');
+            // Show success message and redirect after a short delay
+            setSuccessMessage('Successfully canceled participation in the test');
+            setTimeout(() => {
+                navigate('/tests');
+            }, 1500);
+            
         } catch (error) {
             console.error("Error canceling participation:", error);
-            setError(error.message || 'An error occurred while canceling participation');
+            setCancelError(error.message || 'An error occurred while canceling participation');
+        } finally {
+            setCanceling(false);
         }
     };
 
@@ -214,6 +228,11 @@ export default function TestDetails() {
 
                     <div className={styles.result_section}>
                         <h3>Test Result</h3>
+                        {cancelError && (
+                            <div className={styles.error_message}>
+                                <p>{cancelError}</p>
+                            </div>
+                        )}
                         <form onSubmit={handleSubmit}>
                             <textarea
                                 className={styles.result_input}
@@ -230,18 +249,58 @@ export default function TestDetails() {
                                         <button 
                                             type="submit" 
                                             className={styles.submit_button}
-                                            disabled={submitting || !resultData.trim()}
+                                            disabled={submitting || canceling || !resultData.trim()}
                                         >
                                             {submitting ? 'Submitting...' : 'Submit Result'}
                                         </button>
-                                        <button
-                                            type="button"
-                                            className={styles.cancel_button}
-                                            onClick={handleCancel}
-                                            disabled={submitting}
-                                        >
-                                            Cancel Participation
-                                        </button>
+                                        
+                                        {/* Cancel Participation Modal */}
+                                        {!canceling ? (
+                                            <button
+                                                type="button"
+                                                className={styles.cancel_button}
+                                                onClick={() => document.getElementById('cancelModal').showModal()}
+                                                disabled={submitting}
+                                            >
+                                                Cancel Participation
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className={styles.cancel_button}
+                                                disabled={true}
+                                            >
+                                                Processing...
+                                            </button>
+                                        )}
+                                        
+                                        <dialog id="cancelModal" className={styles.modal}>
+                                            <div className={styles.modal_content}>
+                                                <h3>Cancel Participation</h3>
+                                                <p>Are you sure you want to cancel your participation in this test?</p>
+                                                <p className={styles.warning_text}>
+                                                    Note: You cannot cancel if the test is scheduled to begin in less than 15 minutes.
+                                                </p>
+                                                <div className={styles.modal_buttons}>
+                                                    <button 
+                                                        type="button" 
+                                                        className={styles.confirm_button}
+                                                        onClick={handleCancel}
+                                                        disabled={canceling}
+                                                    >
+                                                        {canceling ? 'Processing...' : 'Confirm'}
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        className={styles.cancel_modal_button}
+                                                        onClick={() => document.getElementById('cancelModal').close()}
+                                                        disabled={canceling}
+                                                    >
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </dialog>
                                     </>
                                 )}
                             </div>
