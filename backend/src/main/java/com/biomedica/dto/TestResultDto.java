@@ -21,7 +21,5 @@ public class TestResultDto {
 
     private TestDto test;
 
-    private LaboratoryDto laboratory;
-
-    private LaboratoryAssistantDto laboratoryAssistant;
+    private UserDto patient;
 }

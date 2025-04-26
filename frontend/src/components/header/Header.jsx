@@ -23,6 +23,9 @@ export default function Header() {
                 {userRole === "ADMINISTRATOR" && <NavLink to="/laboratories" className={styles.nav_link}>
                     Laboratories
                 </NavLink>}
+                {userRole === "LABORATORY_ASSISTANT" && <NavLink to="/tests" className={styles.nav_link}>
+                    Tests
+                </NavLink>}
                 {token ? (
                     <div className={styles.user_info}>
                         {/* <span className={styles.user_name}>

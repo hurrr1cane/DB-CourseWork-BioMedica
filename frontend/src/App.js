@@ -7,6 +7,8 @@ import LaboratoriesPage from './pages/LaboratoriesPage';
 import LaboratoryPage from './pages/LaboratoryPage';
 import AssistantsPage from './pages/AssistantsPage';
 import AssistantDetailPage from './pages/AssistantDetailPage';
+import TestsPage from './pages/TestsPage';
+import TestDetails from './pages/TestDetailsPage';
 
 const router = createBrowserRouter(
   [
@@ -18,6 +20,8 @@ const router = createBrowserRouter(
     { path: '/laboratories/edit/:id', element: <LaboratoryPage /> },
     { path: '/assistants', element: <AssistantsPage /> },
     { path: '/assistants/:id', element: <AssistantDetailPage /> },
+    { path: '/tests', element: <TestsPage /> },
+    { path: '/tests/:id', element: <TestDetails /> },
   ]
 )
 

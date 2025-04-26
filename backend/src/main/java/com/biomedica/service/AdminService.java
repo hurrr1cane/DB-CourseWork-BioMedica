@@ -42,6 +42,7 @@ public class AdminService {
         labAssistant.setPassword(hashedPassword);
         labAssistant.setName(registerLabAssistantRequest.getName());
         labAssistant.setSurname(registerLabAssistantRequest.getSurname());
+        labAssistant.setVerified(true);
 
         return laboratoryAssistantMapper.toDto(laboratoryAssistantRepository.save(labAssistant));
     }

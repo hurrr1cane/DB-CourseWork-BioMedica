@@ -39,6 +39,20 @@ public class LaboratoryAssistantService {
     }
 
     /**
+     * Retrieves a specific test result assigned to the laboratory assistant.
+     *
+     * @param testResultId The ID of the test result.
+     * @return The test result DTO.
+     */
+    @Transactional(readOnly = true)
+    public TestResultDto getTestResultById(UUID testResultId) {
+        LaboratoryAssistant user = (LaboratoryAssistant) auditService.getPrincipal();
+        TestResult testResult = testResultRepository.findByIdAndLaboratoryAssistant(testResultId, user)
+                .orElseThrow(() -> new EntityNotFoundException("Test result not found"));
+        return testResultMapper.toDto(testResult);
+    }
+
+    /**
      * Updates a test result with the provided data.
      *
      * @param testResultId The ID of the test result to update.

@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +34,12 @@ public class LaboratoryAssistantController {
         return ResponseEntity.ok(laboratoryAssistantService.getTestResultsForAssistant(pageable));
     }
 
+    @GetMapping("/test-results/{testResultId}")
+    @Operation(summary = "Get a specific test result assigned to the assistant")
+    public ResponseEntity<TestResultDto> getTestResultById(@PathVariable UUID testResultId) {
+        return ResponseEntity.ok(laboratoryAssistantService.getTestResultById(testResultId));
+    }
+
     @PutMapping("/test-results/{testResultId}/fill")
     @Operation(summary = "Fill a test result with data")
     public ResponseEntity<TestResultDto> fillTestResult(
@@ -42,7 +48,7 @@ public class LaboratoryAssistantController {
         return ResponseEntity.ok(laboratoryAssistantService.fillTestResult(testResultId, resultData));
     }
 
-    @DeleteMapping("/test-results/{testResultId}/cancel")
+    @PostMapping("/test-results/{testResultId}/cancel")
     @Operation(summary = "Cancel assistant's participation in a test result")
     public ResponseEntity<Void> cancelParticipation(@PathVariable UUID testResultId) {
         laboratoryAssistantService.cancelParticipation(testResultId);
