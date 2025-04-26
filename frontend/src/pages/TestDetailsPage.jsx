@@ -31,11 +31,11 @@ export default function TestDetails() {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch test result details');
             }
-            
+
             const data = await response.json();
             setTestResult(data);
             if (data.result) {
@@ -63,15 +63,15 @@ export default function TestDetails() {
                 },
                 body: JSON.stringify(resultData)
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to submit test result');
             }
-            
+
             const updatedTest = await response.json();
             setTestResult(updatedTest);
             setSuccessMessage('Test result successfully submitted!');
-            
+
             setTimeout(() => {
                 setSuccessMessage(null);
             }, 3000);
@@ -86,7 +86,7 @@ export default function TestDetails() {
     const handleCancel = async () => {
         setCanceling(true);
         setCancelError(null);
-        
+
         try {
             const token = localStorage.getItem('accessToken');
             const response = await fetch(`${api}/test-results/${id}/cancel`, {
@@ -95,19 +95,19 @@ export default function TestDetails() {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
             if (!response.ok) {
                 // Parse the error response
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to cancel participation');
             }
-            
+
             // Show success message and redirect after a short delay
             setSuccessMessage('Successfully canceled participation in the test');
             setTimeout(() => {
-                navigate('/tests');
+                navigate('/assistant-tests');
             }, 1500);
-            
+
         } catch (error) {
             console.error("Error canceling participation:", error);
             setCancelError(error.message || 'An error occurred while canceling participation');
@@ -147,7 +147,7 @@ export default function TestDetails() {
                         <button onClick={fetchTestResult} className={styles.retry_button}>
                             Retry
                         </button>
-                        <button onClick={() => navigate('/tests')} className={styles.back_button}>
+                        <button onClick={() => navigate('/assistant-tests')} className={styles.back_button}>
                             Back to Tests
                         </button>
                     </div>
@@ -164,7 +164,7 @@ export default function TestDetails() {
                 <main className={styles.content}>
                     <div className={styles.error_message}>
                         <h2>Test Not Found</h2>
-                        <button onClick={() => navigate('/tests')} className={styles.back_button}>
+                        <button onClick={() => navigate('/assistant-tests')} className={styles.back_button}>
                             Back to Tests
                         </button>
                     </div>
@@ -179,7 +179,7 @@ export default function TestDetails() {
             <Header />
             <main className={styles.content}>
                 <div className={styles.page_header}>
-                    <button onClick={() => navigate('/tests')} className={styles.back_button}>
+                    <button onClick={() => navigate('/assistant-tests')} className={styles.back_button}>
                         ← Back to Tests
                     </button>
                     <h1>Test Details</h1>
@@ -191,11 +191,17 @@ export default function TestDetails() {
                     </div>
                 )}
 
+                {cancelError && (
+                    <div className={styles.error_message}>
+                        <p>{cancelError}</p>
+                    </div>
+                )}
+
                 <div className={styles.test_details_card}>
                     <div className={styles.test_info_section}>
                         <h2>{testResult.test.name}</h2>
                         <p className={styles.test_description}>{testResult.test.description}</p>
-                        
+
                         <div className={styles.details_grid}>
                             <div className={styles.detail_item}>
                                 <span className={styles.detail_label}>Patient:</span>
@@ -228,11 +234,6 @@ export default function TestDetails() {
 
                     <div className={styles.result_section}>
                         <h3>Test Result</h3>
-                        {cancelError && (
-                            <div className={styles.error_message}>
-                                <p>{cancelError}</p>
-                            </div>
-                        )}
                         <form onSubmit={handleSubmit}>
                             <textarea
                                 className={styles.result_input}
@@ -242,18 +243,18 @@ export default function TestDetails() {
                                 rows={10}
                                 disabled={!!testResult.result}
                             ></textarea>
-                            
+
                             <div className={styles.action_buttons}>
                                 {!testResult.result && (
                                     <>
-                                        <button 
-                                            type="submit" 
+                                        <button
+                                            type="submit"
                                             className={styles.submit_button}
                                             disabled={submitting || canceling || !resultData.trim()}
                                         >
                                             {submitting ? 'Submitting...' : 'Submit Result'}
                                         </button>
-                                        
+
                                         {/* Cancel Participation Modal */}
                                         {!canceling ? (
                                             <button
@@ -273,7 +274,7 @@ export default function TestDetails() {
                                                 Processing...
                                             </button>
                                         )}
-                                        
+
                                         <dialog id="cancelModal" className={styles.modal}>
                                             <div className={styles.modal_content}>
                                                 <h3>Cancel Participation</h3>
@@ -282,16 +283,16 @@ export default function TestDetails() {
                                                     Note: You cannot cancel if the test is scheduled to begin in less than 15 minutes.
                                                 </p>
                                                 <div className={styles.modal_buttons}>
-                                                    <button 
-                                                        type="button" 
+                                                    <button
+                                                        type="button"
                                                         className={styles.confirm_button}
                                                         onClick={handleCancel}
                                                         disabled={canceling}
                                                     >
                                                         {canceling ? 'Processing...' : 'Confirm'}
                                                     </button>
-                                                    <button 
-                                                        type="button" 
+                                                    <button
+                                                        type="button"
                                                         className={styles.cancel_modal_button}
                                                         onClick={() => document.getElementById('cancelModal').close()}
                                                         disabled={canceling}

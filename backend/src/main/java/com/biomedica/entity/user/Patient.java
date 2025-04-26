@@ -1,6 +1,7 @@
 package com.biomedica.entity.user;
 
 import com.biomedica.entity.Order;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -22,6 +23,6 @@ public class Patient extends User {
     }
 
 
-    @OneToMany(mappedBy = "patient")
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
 }

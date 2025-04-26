@@ -1,6 +1,7 @@
 package com.biomedica.entity;
 
 import com.biomedica.entity.user.LaboratoryAssistant;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,7 +38,6 @@ public class Laboratory {
     @ManyToMany(mappedBy = "laboratories")
     private List<Test> tests;
 
-    @OneToMany(mappedBy = "laboratory")
+    @OneToMany(mappedBy = "laboratory", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<LaboratoryAssistant> laboratoryAssistants;
-
 }

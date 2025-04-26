@@ -9,6 +9,8 @@ import AssistantsPage from './pages/AssistantsPage';
 import AssistantDetailPage from './pages/AssistantDetailPage';
 import TestsPage from './pages/TestsPage';
 import TestDetails from './pages/TestDetailsPage';
+import TestsManagementPage from './pages/TestsManagementPage';
+import TestDetailPage from './pages/TestDetailPage';
 
 const router = createBrowserRouter(
   [
@@ -20,8 +22,10 @@ const router = createBrowserRouter(
     { path: '/laboratories/edit/:id', element: <LaboratoryPage /> },
     { path: '/assistants', element: <AssistantsPage /> },
     { path: '/assistants/:id', element: <AssistantDetailPage /> },
-    { path: '/tests', element: <TestsPage /> },
-    { path: '/tests/:id', element: <TestDetails /> },
+    { path: '/assistant-tests', element: <TestsPage /> },
+    { path: '/assistant-tests/:id', element: <TestDetails /> },
+    { path: '/tests', element: <TestsManagementPage /> },
+    { path: '/tests/:id', element: <TestDetailPage /> },
   ]
 )
 

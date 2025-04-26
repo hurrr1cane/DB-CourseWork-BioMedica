@@ -3,11 +3,11 @@ package com.biomedica.service;
 import com.biomedica.dto.LaboratoryAssistantDto;
 import com.biomedica.dto.RegisterLabAssistantRequest;
 import com.biomedica.dto.mapper.LaboratoryAssistantMapper;
-import com.biomedica.dto.mapper.UserMapper;
 import com.biomedica.entity.user.LaboratoryAssistant;
 import com.biomedica.repository.LaboratoryAssistantRepository;
 import com.biomedica.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +22,10 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final LaboratoryAssistantRepository laboratoryAssistantRepository;
-    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final LaboratoryAssistantMapper laboratoryAssistantMapper;
 
+    @Transactional
     public LaboratoryAssistantDto registerLabAssistant(RegisterLabAssistantRequest registerLabAssistantRequest) {
         // Check if email already exists
         if (userRepository.existsByEmail(registerLabAssistantRequest.getEmail())) {
@@ -57,6 +57,7 @@ public class AdminService {
         return laboratoryAssistantMapper.toDto(labAssistant);
     }
 
+    @Transactional
     public LaboratoryAssistantDto updateLaboratoryAssistant(UUID id, RegisterLabAssistantRequest registerLabAssistantRequest) {
         LaboratoryAssistant labAssistant = laboratoryAssistantRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant not found"));
@@ -69,6 +70,7 @@ public class AdminService {
         return laboratoryAssistantMapper.toDto(laboratoryAssistantRepository.save(labAssistant));
     }
 
+    @Transactional
     public void deleteLaboratoryAssistant(UUID id) {
         LaboratoryAssistant labAssistant = laboratoryAssistantRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Laboratory Assistant not found"));

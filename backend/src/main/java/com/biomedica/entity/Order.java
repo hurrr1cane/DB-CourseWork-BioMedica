@@ -1,10 +1,12 @@
 package com.biomedica.entity;
 
 import com.biomedica.entity.user.Patient;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -25,7 +27,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name="orders")
+@Table(name="orders", indexes = {
+        @Index(name = "idx_order_patient", columnList = "patient_id")
+})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,7 +42,7 @@ public class Order {
     @ManyToOne
     private Patient patient;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TestResult> testResults = new ArrayList<>();
 }

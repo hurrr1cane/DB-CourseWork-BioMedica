@@ -54,7 +54,7 @@ export default function TestsPage() {
     };
 
     const openTestDetails = (id) => {
-        navigate(`/tests/${id}`);
+        navigate(`/assistant-tests/${id}`);
     }
 
     const formatDate = (dateString) => {

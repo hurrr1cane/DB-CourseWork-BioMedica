@@ -17,7 +17,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "users")
+@Table(name = "verification_entity", indexes = {
+        @Index(name = "idx_verification_user", columnList = "user_id"),
+        @Index(name = "idx_verification_email_type", columnList = "user_id, verification_type")
+})
 public abstract class User implements UserDetails {
 
     @Id

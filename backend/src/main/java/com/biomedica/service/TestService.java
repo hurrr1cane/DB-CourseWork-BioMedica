@@ -6,6 +6,7 @@ import com.biomedica.dto.mapper.TestMapper;
 import com.biomedica.entity.Test;
 import com.biomedica.repository.TestRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class TestService {
         return testMapper.toDto(test);
     }
 
+    @Transactional
     public TestDto createTest(TestRequest testRequest) {
         Test test = Test.builder()
                 .name(testRequest.getName())
@@ -39,6 +41,7 @@ public class TestService {
         return testMapper.toDto(testRepository.save(test));
     }
 
+    @Transactional
     public TestDto updateTest(UUID id, TestRequest testRequest) {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Test not found with ID: " + id));

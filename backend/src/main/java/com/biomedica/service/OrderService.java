@@ -124,6 +124,7 @@ public class OrderService {
         return orderMapper.toDto(newOrder);
     }
 
+    @Transactional
     public OrderDto payOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
