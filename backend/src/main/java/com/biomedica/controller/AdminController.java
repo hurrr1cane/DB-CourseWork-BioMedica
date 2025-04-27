@@ -88,6 +88,12 @@ public class AdminController {
         return ResponseEntity.ok(laboratoryService.editLaboratory(laboratoryId, laboratoryRequest));
     }
 
+    @DeleteMapping("/laboratories/{laboratoryId}")
+    public ResponseEntity<Void> deleteLaboratory(@PathVariable UUID laboratoryId) {
+        laboratoryService.deleteLaboratory(laboratoryId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/laboratories/pending-tests")
     public ResponseEntity<List<LaboratoryPendingTestsDto>> getLaboratoriesWithPendingTests() {
         return ResponseEntity.ok(laboratoryService.getLaboratoriesWithPendingTests());
@@ -125,6 +131,12 @@ public class AdminController {
             @RequestBody @Validated(PatchValidation.class) TestRequest testRequest
     ) {
         return ResponseEntity.ok(testService.updateTest(testId, testRequest));
+    }
+
+    @DeleteMapping("/tests/{testId}")
+    public ResponseEntity<Void> deleteTest(@PathVariable UUID testId) {
+        testService.deleteTest(testId);
+        return ResponseEntity.noContent().build();
     }
 
 }

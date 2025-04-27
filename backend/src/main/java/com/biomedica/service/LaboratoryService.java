@@ -225,5 +225,18 @@ public class LaboratoryService {
         }
     }
 
+    @Transactional
+    public void deleteLaboratory(UUID laboratoryId) {
+        Laboratory laboratory = laboratoryRepository.findById(laboratoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Laboratory not found with id: " + laboratoryId));
+
+        // Clear the many-to-many relationship with tests first
+        laboratory.getTests().forEach(test -> test.getLaboratories().remove(laboratory));
+        laboratory.getTests().clear();
+
+        // Now delete the laboratory
+        laboratoryRepository.delete(laboratory);
+    }
+
 
 }

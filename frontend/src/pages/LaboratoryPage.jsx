@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from '../styles/laboratory_page.module.css';
 
-const LaboratoryPage = () => {
+export default function LaboratoryPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [laboratory, setLaboratory] = useState(null);
@@ -11,6 +11,7 @@ const LaboratoryPage = () => {
     const [error, setError] = useState(null);
     const [editing, setEditing] = useState(false);
     const [editedLaboratory, setEditedLaboratory] = useState(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const api = "http://localhost:8080/api/";
 
@@ -92,8 +93,7 @@ const LaboratoryPage = () => {
             try {
                 const token = localStorage.getItem('accessToken');
                 const response = await fetch(
-                    `${api}admin/tests?page=${testsPage}&size=${testsPageSize}&sort=name,asc${
-                        testSearchQuery ? `&name=${encodeURIComponent(testSearchQuery)}` : ''
+                    `${api}admin/tests?page=${testsPage}&size=${testsPageSize}&sort=name,asc${testSearchQuery ? `&name=${encodeURIComponent(testSearchQuery)}` : ''
                     }`,
                     {
                         headers: {
@@ -115,8 +115,7 @@ const LaboratoryPage = () => {
             try {
                 const token = localStorage.getItem('accessToken');
                 const response = await fetch(
-                    `${api}admin/laboratory-assistants?page=${assistantsPage}&size=${assistantsPageSize}&sort=surname,asc${
-                        assistantSearchQuery ? `&lastName=${encodeURIComponent(assistantSearchQuery)}` : ''
+                    `${api}admin/laboratory-assistants?page=${assistantsPage}&size=${assistantsPageSize}&sort=surname,asc${assistantSearchQuery ? `&lastName=${encodeURIComponent(assistantSearchQuery)}` : ''
                     }`,
                     {
                         headers: {
@@ -140,7 +139,7 @@ const LaboratoryPage = () => {
         if (assistantsDialogOpen) {
             fetchAssistants();
         }
-    }, [testsDialogOpen, assistantsDialogOpen, testsPage, testsPageSize, testSearchQuery, 
+    }, [testsDialogOpen, assistantsDialogOpen, testsPage, testsPageSize, testSearchQuery,
         assistantsPage, assistantsPageSize, assistantSearchQuery]);
 
     const handleInputChange = (e) => {
@@ -156,13 +155,13 @@ const LaboratoryPage = () => {
             // Extract IDs from selected tests and assistants
             const testIds = selectedTests.map(test => test.id);
             const assistantIds = selectedAssistants.map(assistant => assistant.id);
-            
+
             const laboratoryToSave = {
                 ...editedLaboratory,
                 testIds: testIds,
                 laboratoryAssistantIds: assistantIds
             };
-            
+
             // Remove the full objects as they aren't needed in the request
             delete laboratoryToSave.tests;
             delete laboratoryToSave.laboratoryAssistants;
@@ -215,6 +214,30 @@ const LaboratoryPage = () => {
             setSelectedTests(laboratory.tests || []);
             setSelectedAssistants(laboratory.фssistants || []);
             setEditing(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`${api}admin/laboratories/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete laboratory');
+            }
+
+            // Navigate back to laboratories list after successful deletion
+            navigate('/laboratories');
+        } catch (err) {
+            console.error('Failed to delete laboratory', err);
+            setError(err.message || 'Failed to delete laboratory');
+        } finally {
+            setShowDeleteConfirm(false);
         }
     };
 
@@ -286,8 +309,8 @@ const LaboratoryPage = () => {
             <div className={styles.paper}>
                 <div className={styles.header}>
                     <div className={styles.header_left}>
-                        <button 
-                            className={styles.back_button} 
+                        <button
+                            className={styles.back_button}
                             onClick={() => navigate('/laboratories')}
                         >
                             ← Back to Laboratories
@@ -297,10 +320,18 @@ const LaboratoryPage = () => {
                         </h2>
                     </div>
                     <div className={styles.actions}>
-                        {!editing && (
-                            <button className={styles.button} onClick={() => setEditing(true)}>
-                                Edit
-                            </button>
+                        {!editing && id !== 'new' && (
+                            <>
+                                <button className={styles.button} onClick={() => setEditing(true)}>
+                                    Edit
+                                </button>
+                                <button
+                                    className={styles.delete_button}
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                >
+                                    Delete
+                                </button>
+                            </>
                         )}
                         {editing && (
                             <>
@@ -455,7 +486,7 @@ const LaboratoryPage = () => {
                             <h3 className={styles.dialog_title}>Manage Laboratory Tests</h3>
                             <button className={styles.close_button} onClick={() => setTestsDialogOpen(false)}>×</button>
                         </div>
-                        
+
                         {/* Selected tests section */}
                         <div className={styles.dialog_section}>
                             <h4 className={styles.dialog_section_title}>Selected Tests</h4>
@@ -472,8 +503,8 @@ const LaboratoryPage = () => {
                                                     Price: ${Number(test.price).toFixed(2)}
                                                 </div>
                                             </div>
-                                            <button 
-                                                className={styles.remove_button} 
+                                            <button
+                                                className={styles.remove_button}
                                                 onClick={() => handleTestSelection(test)}
                                                 title="Remove from laboratory"
                                             >
@@ -484,15 +515,15 @@ const LaboratoryPage = () => {
                                 </ul>
                             )}
                         </div>
-                        
+
                         <div className={styles.dialog_divider}></div>
-                        
+
                         {/* Available tests section */}
                         <div className={styles.dialog_section}>
                             <div className={styles.dialog_section_header}>
                                 <h4 className={styles.dialog_section_title}>Available Tests</h4>
                             </div>
-                            
+
                             <div className={styles.dialog_content}>
                                 {availableTests.length === 0 ? (
                                     <p className={styles.empty_message}>
@@ -537,10 +568,10 @@ const LaboratoryPage = () => {
                                     </ul>
                                 )}
                             </div>
-                            
+
                             {/* Pagination controls */}
                             <div className={styles.dialog_pagination}>
-                                <button 
+                                <button
                                     className={styles.page_button}
                                     onClick={handlePreviousTestsPage}
                                     disabled={testsPage === 0}
@@ -548,10 +579,10 @@ const LaboratoryPage = () => {
                                     Previous
                                 </button>
                                 <span className={styles.page_info}>
-                                    Page {testsPage + 1} of {totalTestPages || 1} 
+                                    Page {testsPage + 1} of {totalTestPages || 1}
                                     ({totalTestCount} total)
                                 </span>
-                                <button 
+                                <button
                                     className={styles.page_button}
                                     onClick={handleNextTestsPage}
                                     disabled={testsPage >= totalTestPages - 1}
@@ -560,7 +591,7 @@ const LaboratoryPage = () => {
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div className={styles.dialog_actions}>
                             <div className={styles.dialog_info}>
                                 <span>{selectedTests.length} tests selected</span>
@@ -586,9 +617,9 @@ const LaboratoryPage = () => {
                             <ul className={styles.dialog_list}>
                                 {availableAssistants.map((assistant) => {
                                     const isSelected = selectedAssistants.some(a => a.id === assistant.id);
-                                    const isAssignedElsewhere = assistant.laboratoryId && 
+                                    const isAssignedElsewhere = assistant.laboratoryId &&
                                         (!editedLaboratory?.id || assistant.laboratoryId !== editedLaboratory.id);
-                                    
+
                                     return (
                                         <li
                                             key={assistant.id}
@@ -627,7 +658,7 @@ const LaboratoryPage = () => {
                                 })}
                             </ul>
                             <div className={styles.dialog_pagination}>
-                                <button 
+                                <button
                                     className={styles.page_button}
                                     onClick={handlePreviousAssistantsPage}
                                     disabled={assistantsPage === 0}
@@ -635,10 +666,10 @@ const LaboratoryPage = () => {
                                     Previous
                                 </button>
                                 <span className={styles.page_info}>
-                                    Page {assistantsPage + 1} of {totalAssistantPages || 1} 
+                                    Page {assistantsPage + 1} of {totalAssistantPages || 1}
                                     ({totalAssistantCount} total)
                                 </span>
-                                <button 
+                                <button
                                     className={styles.page_button}
                                     onClick={handleNextAssistantsPage}
                                     disabled={assistantsPage >= totalAssistantPages - 1}
@@ -653,8 +684,47 @@ const LaboratoryPage = () => {
                     </div>
                 </div>
             )}
+
+            {showDeleteConfirm && (
+                <div className={styles.dialog_overlay}>
+                    <div className={styles.dialog}>
+                        <div className={styles.dialog_header}>
+                            <h3 className={styles.dialog_title}>Confirm Deletion</h3>
+                            <button
+                                className={styles.close_button}
+                                onClick={() => setShowDeleteConfirm(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className={styles.dialog_content}>
+                            <div className={styles.dialog_section}>
+                                <p className={styles.delete_warning}>
+                                    Are you sure you want to delete this laboratory?
+                                    This action cannot be undone.
+                                </p>
+                                <p className={styles.delete_details}>
+                                    Laboratory at: <strong>{laboratory?.address}</strong>
+                                </p>
+                            </div>
+                        </div>
+                        <div className={styles.dialog_actions}>
+                            <button
+                                className={styles.button_outline}
+                                onClick={() => setShowDeleteConfirm(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className={styles.delete_confirm_button}
+                                onClick={handleDelete}
+                            >
+                                Delete Laboratory
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
-
-export default LaboratoryPage;

@@ -26,4 +26,10 @@ public class ProfileController {
     public ResponseEntity<UserDto> updateProfile(@RequestBody @Valid UpdateProfileRequest updateProfileRequest) {
         return ResponseEntity.ok(profileService.updateProfile(updateProfileRequest));
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAccount() {
+        profileService.deleteCurrentUserAccount();
+        return ResponseEntity.noContent().build();
+    }
 }

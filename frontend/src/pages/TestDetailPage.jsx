@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from '../styles/tests_management_page.module.css';
 import Header from '../components/header/Header';
@@ -10,49 +10,52 @@ export default function TestDetailPage() {
     const [test, setTest] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     
     const isNewTest = id === 'new';
 
-    useEffect(() => {
-        const fetchTest = async () => {
-            // If it's a new test, initialize an empty test object
-            if (isNewTest) {
-                setTest({
-                    name: '',
-                    description: '',
-                    price: 0
-                });
-                setLoading(false);
-                return;
+    // Move fetchTest outside useEffect and make it a useCallback
+    const fetchTest = useCallback(async () => {
+        // If it's a new test, initialize an empty test object
+        if (isNewTest) {
+            setTest({
+                name: '',
+                description: '',
+                price: 0
+            });
+            setLoading(false);
+            return;
+        }
+        
+        try {
+            setLoading(true);
+            // Get access token from localStorage
+            const token = localStorage.getItem('accessToken');
+            
+            const response = await fetch(`http://localhost:8080/api/admin/tests/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch test details');
             }
             
-            try {
-                // Get access token from localStorage
-                const token = localStorage.getItem('accessToken');
-                
-                const response = await fetch(`http://localhost:8080/api/admin/tests/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Add the authorization header
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch test details');
-                }
-                
-                const data = await response.json();
-                setTest(data);
-                setError(null);
-            } catch (error) {
-                console.error("Error fetching test details:", error);
-                setError(error.message || 'An error occurred while fetching test details');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTest();
+            const data = await response.json();
+            setTest(data);
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching test details:", error);
+            setError(error.message || 'An error occurred while fetching test details');
+        } finally {
+            setLoading(false);
+        }
     }, [id, isNewTest]);
+
+    useEffect(() => {
+        fetchTest();
+    }, [fetchTest]);
 
     const handleSave = async () => {
         try {
@@ -81,6 +84,31 @@ export default function TestDetailPage() {
         } catch (error) {
             console.error("Error saving test details:", error);
             setError(error.message || 'An error occurred while saving test details');
+        }
+    };
+
+    // Add delete handler
+    const handleDelete = async () => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            
+            const response = await fetch(`http://localhost:8080/api/admin/tests/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete test');
+            }
+
+            navigate('/tests');
+        } catch (error) {
+            console.error("Error deleting test:", error);
+            setError(error.message || 'An error occurred while deleting the test');
+        } finally {
+            setShowDeleteConfirm(false);
         }
     };
 
@@ -167,11 +195,44 @@ export default function TestDetailPage() {
                     <button onClick={handleSave} className={styles.save_button}>
                         {isNewTest ? 'Create Test' : 'Update Test'}
                     </button>
+                    {!isNewTest && (
+                        <button 
+                            onClick={() => setShowDeleteConfirm(true)} 
+                            className={styles.delete_button}
+                        >
+                            Delete Test
+                        </button>
+                    )}
                     <button onClick={handleCancel} className={styles.cancel_button}>
                         Cancel
                     </button>
                 </div>
             </div>
+            
+            {/* Delete confirmation modal */}
+            {showDeleteConfirm && (
+                <div className={styles.modal_overlay}>
+                    <div className={styles.modal}>
+                        <h3>Delete Test</h3>
+                        <p>Are you sure you want to delete this test? This action cannot be undone.</p>
+                        <div className={styles.modal_buttons}>
+                            <button 
+                                onClick={handleDelete} 
+                                className={styles.delete_confirm_button}
+                            >
+                                Yes, Delete Test
+                            </button>
+                            <button 
+                                onClick={() => setShowDeleteConfirm(false)} 
+                                className={styles.cancel_button}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             <Footer />
         </div>
     );

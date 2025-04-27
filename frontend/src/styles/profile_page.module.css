@@ -130,3 +130,93 @@
     font-size: 1rem;
     color: #ccc;
 }
+
+/* Add to your existing profile_page.module.css */
+
+.delete_button {
+    background-color: #ff4747;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.delete_button:hover {
+    background-color: #e53e3e;
+}
+
+/* Modal styles */
+.modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+    color: #ff4747;
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.modal p {
+    color: #ddd;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.modal_buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.delete_confirm_button {
+    background-color: #ff4747;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.delete_confirm_button:hover {
+    background-color: #e53e3e;
+}
+
+.cancel_button {
+    background-color: transparent;
+    color: #ccc;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.cancel_button:hover {
+    background-color: rgba(204, 204, 204, 0.1);
+}

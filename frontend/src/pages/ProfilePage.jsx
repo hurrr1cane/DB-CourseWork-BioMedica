@@ -11,6 +11,7 @@ export default function ProfilePage() {
     const [currentPage, setCurrentPage] = useState(0); // Current page number
     const [totalPages, setTotalPages] = useState(0); // Total pages available
     const [loading, setLoading] = useState(true); // Loading state
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
 
     const userRole = localStorage.getItem('userRole');
 
@@ -109,7 +110,33 @@ export default function ProfilePage() {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('user');
         navigate('/login');
+    };
+
+    const handleDeleteAccount = async () => {
+        const token = localStorage.getItem('accessToken');
+
+        try {
+            const response = await fetch('http://localhost:8080/api/profile', {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete account');
+            }
+
+            // On successful deletion, log out the user
+            alert('Your account has been deleted successfully.');
+            handleLogout();
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            setShowDeleteModal(false);
+        }
     };
 
     const handleNextPage = () => {
@@ -183,8 +210,39 @@ export default function ProfilePage() {
                         <button onClick={handleLogout} className={styles.logout_button}>
                             Log Out
                         </button>
+                        <button 
+                            onClick={() => setShowDeleteModal(true)} 
+                            className={styles.delete_button}
+                        >
+                            Delete Account
+                        </button>
                     </div>
                 </div>
+                
+                {/* Delete confirmation modal */}
+                {showDeleteModal && (
+                    <div className={styles.modal_overlay}>
+                        <div className={styles.modal}>
+                            <h3>Delete Account</h3>
+                            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+                            <div className={styles.modal_buttons}>
+                                <button 
+                                    onClick={handleDeleteAccount} 
+                                    className={styles.delete_confirm_button}
+                                >
+                                    Yes, Delete My Account
+                                </button>
+                                <button 
+                                    onClick={() => setShowDeleteModal(false)} 
+                                    className={styles.cancel_button}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
                 {userRole === 'PATIENT' &&
                     <div className={styles.orders_section}>
                         <h2>Your Orders</h2>

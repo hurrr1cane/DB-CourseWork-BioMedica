@@ -59,4 +59,15 @@ public class TestService {
         return testMapper.toDto(testRepository.save(test));
     }
 
+    @Transactional
+    public void deleteTest(UUID testId) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new EntityNotFoundException("Test not found with id: " + testId));
+
+        // The cascade settings will handle:
+        // - Removing entries from test_laboratory join table
+        // - Test results will keep the test as they need historical record
+        testRepository.delete(test);
+    }
+
 }

@@ -50,4 +50,14 @@ public class ProfileService {
 
         return userMapper.toDto(user);
     }
+
+    @Transactional
+    public void deleteCurrentUserAccount() {
+        User user = auditService.getPrincipal();
+
+        // The cascade delete will handle:
+        // - For patients: orders and test results (via CascadeType.ALL and orphanRemoval=true)
+        // - For tokens and verification entities (via OnDelete.CASCADE)
+        userRepository.delete(user);
+    }
 }
