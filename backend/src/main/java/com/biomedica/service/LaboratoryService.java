@@ -172,17 +172,23 @@ public class LaboratoryService {
     }
 
     public Page<LaboratoryDto> getLaboratoriesWithFilters(LaboratorySearchDto searchDto, Pageable pageable) {
-        // Створення специфікації для фільтрації
+        // Create specification for filtering
         Specification<Laboratory> spec = Specification.where(null);
 
         if (searchDto.getAddress() != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("address"), "%" + searchDto.getAddress() + "%"));
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("address")),
+                    "%" + searchDto.getAddress().toLowerCase() + "%"));
         }
         if (searchDto.getWorkingHours() != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("workingHours"), "%" + searchDto.getWorkingHours() + "%"));
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("workingHours")),
+                    "%" + searchDto.getWorkingHours().toLowerCase() + "%"));
         }
         if (searchDto.getPhoneNumber() != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("phoneNumber"), "%" + searchDto.getPhoneNumber() + "%"));
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("phoneNumber")),
+                    "%" + searchDto.getPhoneNumber().toLowerCase() + "%"));
         }
 
         Page<Laboratory> laboratories = laboratoryRepository.findAll(spec, pageable);
