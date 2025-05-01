@@ -1,6 +1,7 @@
 package com.biomedica.service;
 
 import com.biomedica.dto.LaboratoryAdminDto;
+import com.biomedica.dto.LaboratoryCSVDto;
 import com.biomedica.dto.LaboratoryDto;
 import com.biomedica.dto.LaboratoryPendingTestsDto;
 import com.biomedica.dto.LaboratoryRequest;
@@ -13,6 +14,9 @@ import com.biomedica.entity.user.LaboratoryAssistant;
 import com.biomedica.repository.LaboratoryAssistantRepository;
 import com.biomedica.repository.LaboratoryRepository;
 import com.biomedica.repository.TestRepository;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -25,7 +29,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -242,6 +250,41 @@ public class LaboratoryService {
 
         // Now delete the laboratory
         laboratoryRepository.delete(laboratory);
+    }
+
+    @Transactional
+    public int processCSVFile(MultipartFile file) throws Exception {
+        try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            HeaderColumnNameMappingStrategy<LaboratoryCSVDto> strategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(LaboratoryCSVDto.class);
+
+            CsvToBean<LaboratoryCSVDto> csvToBean = new CsvToBeanBuilder<LaboratoryCSVDto>(reader)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreEmptyLine(true)
+                    .build();
+
+            List<LaboratoryCSVDto> csvRecords = csvToBean.parse();
+            List<Laboratory> laboratories = new ArrayList<>();
+
+            for (LaboratoryCSVDto dto : csvRecords) {
+                Laboratory laboratory = Laboratory.builder()
+                        .address(dto.getAddress())
+                        .workingHours(dto.getWorkingHours())
+                        .phoneNumber(dto.getPhoneNumber())
+                        .build();
+
+                laboratories.add(laboratory);
+            }
+
+            laboratoryRepository.saveAll(laboratories);
+            log.info("Successfully imported {} laboratories from CSV", laboratories.size());
+            return laboratories.size();
+        } catch (Exception e) {
+            log.error("Failed to parse CSV file: {}", e.getMessage(), e);
+            throw new Exception("Failed to parse CSV file: " + e.getMessage(), e);
+        }
     }
 
 

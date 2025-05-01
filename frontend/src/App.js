@@ -11,6 +11,7 @@ import TestsPage from './pages/TestsPage';
 import TestDetails from './pages/TestDetailsPage';
 import TestsManagementPage from './pages/TestsManagementPage';
 import TestDetailPage from './pages/TestDetailPage';
+import DatabaseAdminPage from './pages/DatabaseAdminPage';
 
 const router = createBrowserRouter(
   [
@@ -26,6 +27,7 @@ const router = createBrowserRouter(
     { path: '/assistant-tests/:id', element: <TestDetails /> },
     { path: '/tests', element: <TestsManagementPage /> },
     { path: '/tests/:id', element: <TestDetailPage /> },
+    { path: '/database-admin', element: <DatabaseAdminPage/> },
   ]
 )
 

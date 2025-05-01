@@ -26,6 +26,9 @@ export default function Header() {
                 {userRole === "ADMINISTRATOR" && <NavLink to="/tests" className={styles.nav_link}>
                     Manage Tests
                 </NavLink>}
+                {userRole === "ADMINISTRATOR" && <NavLink to="/database-admin" className={styles.nav_link}>
+                    Database Tools
+                </NavLink>}
                 {userRole === "LABORATORY_ASSISTANT" && <NavLink to="/assistant-tests" className={styles.nav_link}>
                     Tests
                 </NavLink>}

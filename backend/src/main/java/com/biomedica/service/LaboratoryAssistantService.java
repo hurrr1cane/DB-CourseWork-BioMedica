@@ -1,29 +1,50 @@
 package com.biomedica.service;
 
+import com.biomedica.dto.LaboratoryAssistantCSVDto;
 import com.biomedica.dto.TestResultDto;
 import com.biomedica.dto.mapper.TestResultMapper;
+import com.biomedica.entity.Laboratory;
 import com.biomedica.entity.TestResult;
 import com.biomedica.entity.user.LaboratoryAssistant;
 import com.biomedica.repository.LaboratoryAssistantRepository;
+import com.biomedica.repository.LaboratoryRepository;
 import com.biomedica.repository.TestResultRepository;
+import com.biomedica.repository.UserRepository;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LaboratoryAssistantService {
 
     private final TestResultRepository testResultRepository;
     private final LaboratoryAssistantRepository laboratoryAssistantRepository;
     private final TestResultMapper testResultMapper;
     private final AuditService auditService;
+    private final LaboratoryRepository laboratoryRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final Random random = new Random();
 
     /**
      * Retrieves all test results assigned to the laboratory assistant.
@@ -111,5 +132,62 @@ public class LaboratoryAssistantService {
         // Assign the new assistant
         testResult.setLaboratoryAssistant(newAssistant);
         testResultRepository.save(testResult);
+    }
+
+    @Transactional
+    public int processCSVFile(MultipartFile file) throws Exception {
+        try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            HeaderColumnNameMappingStrategy<LaboratoryAssistantCSVDto> strategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(LaboratoryAssistantCSVDto.class);
+
+            CsvToBean<LaboratoryAssistantCSVDto> csvToBean = new CsvToBeanBuilder<LaboratoryAssistantCSVDto>(reader)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreEmptyLine(true)
+                    .build();
+
+            List<LaboratoryAssistantCSVDto> csvRecords = csvToBean.parse();
+
+            // Get all laboratories for random assignment
+            List<Laboratory> allLaboratories = laboratoryRepository.findAll();
+            if (allLaboratories.isEmpty()) {
+                throw new RuntimeException("No laboratories found in the database. Please create laboratories first.");
+            }
+
+            List<LaboratoryAssistant> assistants = new ArrayList<>();
+
+            for (LaboratoryAssistantCSVDto dto : csvRecords) {
+                // Check if email already exists
+                if (userRepository.existsByEmail(dto.getEmail())) {
+                    throw new IllegalArgumentException("Email already in use");
+                }
+
+                // Hash the password
+                String hashedPassword = passwordEncoder.encode(dto.getPassword());
+
+                // Assign a random laboratory
+                Laboratory randomLab = allLaboratories.get(random.nextInt(allLaboratories.size()));
+
+                // Create a new LabAssistant entity
+                LaboratoryAssistant labAssistant = new LaboratoryAssistant();
+                labAssistant.setEmail(dto.getEmail());
+                labAssistant.setPhoneNumber(dto.getPhoneNumber());
+                labAssistant.setPassword(hashedPassword);
+                labAssistant.setName(dto.getName());
+                labAssistant.setSurname(dto.getSurname());
+                labAssistant.setVerified(true);
+                labAssistant.setLaboratory(randomLab);
+
+                assistants.add(labAssistant);
+            }
+
+            laboratoryAssistantRepository.saveAll(assistants);
+            log.info("Successfully imported {} laboratory assistants from CSV", assistants.size());
+            return assistants.size();
+        } catch (Exception e) {
+            log.error("Failed to parse CSV file: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage(), e);
+        }
     }
 }
