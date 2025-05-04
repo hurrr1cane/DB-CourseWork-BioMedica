@@ -174,7 +174,42 @@ export default function ProfilePage() {
         } catch (error) {
             alert(error.message);
         }
-    }
+    };
+
+    const handleDownloadOrderInfo = (order) => {
+        // Format the order data to make it more appealing
+        const formattedOrder = {
+            orderId: order.id,
+            orderDate: new Date(order.orderDate).toLocaleString(),
+            status: order.paid ? "Paid" : "Pending Payment",
+            tests: order.testResults.map(result => ({
+                name: result.test.name,
+                description: result.test.description,
+                price: `$${result.test.price.toFixed(2)}`,
+                date: new Date(result.testDate).toLocaleString(),
+                result: result.result || "Results pending"
+            })),
+            totalAmount: `$${order.testResults.reduce((sum, item) => sum + item.test.price, 0).toFixed(2)}`
+        };
+
+        // Convert the data to a prettified JSON string
+        const jsonString = JSON.stringify(formattedOrder, null, 2);
+        
+        // Create a blob and download link
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create a temporary link element and trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `order-${order.id}.json`;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div className={styles.profile_page_container}>
@@ -266,6 +301,7 @@ export default function ProfilePage() {
                                                 <strong>Paid:</strong> {order.paid ? 'Yes' : 'No'}
                                             </p>
                                             {!order.paid && <button className={styles.save_button} onClick={() => handlePayForOrder(order.id)}>Pay</button>}
+                                            <button className={styles.save_button} onClick={() => handleDownloadOrderInfo(order)}>Download Info</button>
                                             <h4>Test Results:</h4>
                                             <ul>
                                                 {order.testResults.map((result) => (
