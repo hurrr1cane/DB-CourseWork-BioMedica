@@ -80,7 +80,7 @@ public class TestDataGeneratorService {
 
         for (int i = 0; i < orderCount; i++) {
             Order order = Order.builder()
-                    .orderDate(OffsetDateTime.now().minusDays(random.nextInt(30)))
+                    .orderDate(OffsetDateTime.now().minusDays(random.nextInt(300)))
                     .isPaid(random.nextBoolean())
                     .patient(patient)
                     .testResults(new ArrayList<>())
@@ -122,6 +122,10 @@ public class TestDataGeneratorService {
     }
 
     private String generateRandomResult() {
+        if (random.nextBoolean()) {
+            return null;
+        }
+
         String[] possibleResults = {
                 "Normal", "Abnormal", "Positive", "Negative", "Inconclusive",
                 "Within range", "Outside range", "12.5 mg/dL", "140/90 mmHg",
