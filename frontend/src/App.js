@@ -12,6 +12,7 @@ import TestDetails from './pages/TestDetailsPage';
 import TestsManagementPage from './pages/TestsManagementPage';
 import TestDetailPage from './pages/TestDetailPage';
 import DatabaseAdminPage from './pages/DatabaseAdminPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 const router = createBrowserRouter(
   [
@@ -28,6 +29,7 @@ const router = createBrowserRouter(
     { path: '/tests', element: <TestsManagementPage /> },
     { path: '/tests/:id', element: <TestDetailPage /> },
     { path: '/database-admin', element: <DatabaseAdminPage/> },
+    { path: '/analytics', element: <AnalyticsPage /> },
   ]
 )
 

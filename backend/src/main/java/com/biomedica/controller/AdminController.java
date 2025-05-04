@@ -4,6 +4,7 @@ import com.biomedica.dto.LaboratoryAdminDto;
 import com.biomedica.dto.LaboratoryAssistantDto;
 import com.biomedica.dto.LaboratoryPendingTestsDto;
 import com.biomedica.dto.LaboratoryRequest;
+import com.biomedica.dto.MonthlyOrderStats;
 import com.biomedica.dto.RegisterLabAssistantRequest;
 import com.biomedica.dto.TestDto;
 import com.biomedica.dto.TestRequest;
@@ -13,6 +14,7 @@ import com.biomedica.dto.validation.PostValidation;
 import com.biomedica.service.AdminService;
 import com.biomedica.service.LaboratoryAssistantService;
 import com.biomedica.service.LaboratoryService;
+import com.biomedica.service.OrderAnalyticsService;
 import com.biomedica.service.TestDataGeneratorService;
 import com.biomedica.service.TestService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,6 +53,7 @@ public class AdminController {
     private final TestService testService;
     private final LaboratoryAssistantService laboratoryAssistantService;
     private final TestDataGeneratorService testDataGeneratorService;
+    private final OrderAnalyticsService orderAnalyticsService;
 
     /**
      * Endpoint to register a new laboratory assistant.
@@ -242,6 +245,22 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to generate test data: " + e.getMessage());
         }
+    }
+
+    /**
+     * Get aggregated order data by month for a specific year
+     *
+     * @param year The year to get data for
+     * @return Monthly statistics including order count and total amount
+     */
+    @GetMapping("/analytics/orders/{year}")
+    public ResponseEntity<List<MonthlyOrderStats>> getMonthlyOrderStats(@PathVariable int year) {
+        if (year < 2000 || year > 2100) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<MonthlyOrderStats> stats = orderAnalyticsService.getMonthlyOrderStats(year);
+        return ResponseEntity.ok(stats);
     }
 
 }
