@@ -11,10 +11,13 @@ export default function OrderPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [laboratories, setLaboratories] = useState([]);
     const [selectedLab, setSelectedLab] = useState(null);
-    const [selectedTests, setSelectedTests] = useState([]);  // Store each test instance with time
-    const [labTests, setLabTests] = useState([]); // List of tests for selected lab
+    const [selectedTests, setSelectedTests] = useState([]);
+    const [labTests, setLabTests] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
+    const [orderError, setOrderError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
@@ -43,12 +46,11 @@ export default function OrderPage() {
 
     const handleSelectLab = (lab) => {
         setSelectedLab(lab);
-        setLabTests(lab.tests); // Fetch tests from selected lab
-        setSelectedTests([]); // Reset selected tests
+        setLabTests(lab.tests);
+        setSelectedTests([]);
     };
 
     const handleAddTest = (test) => {
-
         setSelectedTests((prev) => [
             ...prev,
             { ...test, testTime: new Date() }
@@ -68,6 +70,9 @@ export default function OrderPage() {
     };
 
     const handleCreateOrder = async () => {
+        setOrderError('');
+        setIsSubmitting(true);
+        
         const orderRequest = {
             tests: selectedTests.map((test) => ({
                 testDate: test.testTime.toISOString(),
@@ -88,19 +93,34 @@ export default function OrderPage() {
     
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Error response:', errorData);
-                throw new Error('Failed to create order');
+                
+                if (errorData.message && errorData.message.includes("No available laboratory assistants")) {
+                    setOrderError("There are no laboratory assistants available at your selected times. Please try different time slots.");
+                } else {
+                    setOrderError(errorData.message || 'Failed to create order. Please try again.');
+                }
+                
+                setTimeout(() => {
+                    document.querySelector(`.${styles.error_message}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+                
+                return;
             }
     
             const data = await response.json();
-            alert('Order created successfully');
-            navigate('/profile');
+            setSuccessMessage('Order created successfully');
+            
+            setTimeout(() => {
+                navigate('/profile');
+            }, 2000);
+            
         } catch (error) {
             console.error('Error creating order:', error);
-            alert('Failed to create order');
+            setOrderError('An unexpected error occurred. Please try again later.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
-    
 
     const loadMoreLaboratories = () => {
         if (currentPage + 1 < totalPages) {
@@ -113,6 +133,14 @@ export default function OrderPage() {
             <Header />
             <main className={styles.content}>
                 <h1>Create Your Order</h1>
+                
+                {successMessage && (
+                    <div className={styles.success_message}>
+                        <span className={styles.success_icon}>✓</span>
+                        {successMessage}
+                    </div>
+                )}
+                
                 {!selectedLab ? (
                     <div>
                         <h2>Select a Laboratory:</h2>
@@ -166,14 +194,38 @@ export default function OrderPage() {
                                 ))}
                             </ul>
                         )}
+                        
+                        {orderError && (
+                            <div className={styles.error_message}>
+                                <span className={styles.error_icon}>⚠️</span>
+                                <div>
+                                    <p className={styles.error_text}>{orderError}</p>
+                                    {orderError.includes("laboratory assistants") && (
+                                        <p className={styles.error_help}>
+                                            Try selecting different time slots for your tests.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        
                         {selectedTests.length > 0 && (
-                            <div>
-                                <button className={styles.order_button} onClick={handleCreateOrder}>
-                                    Create Order
+                            <div className={styles.order_summary}>
+                                <div className={styles.total_section}>
+                                    <span>Total: </span>
+                                    <span className={styles.total_amount}>
+                                        ${selectedTests.reduce((sum, test) => sum + test.price, 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                <button 
+                                    className={styles.order_button} 
+                                    onClick={handleCreateOrder}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Creating Order...' : 'Create Order'}
                                 </button>
                             </div>
                         )}
-
                     </div>
                 )}
             </main>

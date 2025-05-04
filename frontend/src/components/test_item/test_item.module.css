@@ -3,25 +3,31 @@
     align-items: center;
     flex-direction: column;
     justify-content: space-between;
-    margin-bottom: 10px;
-    padding: 1rem;
-    border: 2px solid green; /* Green border */
-    border-radius: 5px;
-    background-color: #101010;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #222;
+    transition: box-shadow 0.3s ease;
     cursor: pointer;
+}
+
+.testItem:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .testInfo {
     display: flex;
-    flex-direction: row; /* Change to row to display items horizontally */
+    flex-direction: row;
     justify-content: space-between;
-    width: 100%; /* Ensure it takes full available width */
+    width: 100%;
     margin-right: 15px;
+    margin-bottom: 16px;
 }
 
 .testItemLabel {
     font-weight: bold;
-    margin-right: 10px; /* Space between label and other items */
+    margin-right: 10px;
 }
 
 .testItemInput {
@@ -32,18 +38,121 @@
     margin-left: 0.5rem;
 }
 
-.timePicker {
-    margin-top: 10px;
-    align-self: flex-end;
+.testName {
+    font-size: 1.25rem;
+    color: #32cd32;
+    margin: 0 0 8px 0;
 }
 
-.selectStatus {
+.testDescription {
+    color: #ccc;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.testPrice {
     font-weight: bold;
-    color: green;
+    color: #fff;
+    margin: 8px 0;
+}
+
+.dateTimePicker {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #444;
+}
+
+.dateTimeLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #ddd;
+}
+
+.datePickerContainer {
+    margin-bottom: 16px;
+}
+
+.dateSelect {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #444;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.dateSelect:focus {
+    border-color: #32cd32;
+    box-shadow: 0 0 0 2px rgba(50, 205, 50, 0.2);
+}
+
+.timePickerContainer {
+    margin-bottom: 16px;
+}
+
+.timeButtonsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+@media (max-width: 600px) {
+    .timeButtonsGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 400px) {
+    .timeButtonsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.timeButton {
+    padding: 8px;
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeButton:hover {
+    background-color: #444;
+}
+
+.selectedTime {
+    background-color: #32cd32;
+    color: #1a1a1a;
+    border-color: #32cd32;
+    font-weight: 600;
 }
 
 .errorMessage {
-    color: red;
+    color: #ff4747;
+    margin-top: 8px;
     font-size: 0.9rem;
-    margin-top: 5px;
+}
+
+.noTimesMessage {
+    color: #ff4747;
+    margin: 16px 0;
+    text-align: center;
+    font-style: italic;
+}
+
+.selectedDateTime {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: rgba(50, 205, 50, 0.1);
+    border: 1px solid rgba(50, 205, 50, 0.3);
+    border-radius: 4px;
+    color: #32cd32;
+    font-weight: 500;
+    text-align: center;
 }
