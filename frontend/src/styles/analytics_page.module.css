@@ -4,33 +4,34 @@
     min-height: 100vh;
     background-color: #1a1a1a;
     color: #fff;
-  }
-  
-  .content {
+}
+
+.content {
     flex: 1;
     padding: 2rem;
     padding-top: 8rem;
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-  }
-  
-  .title {
+    box-sizing: border-box;
+}
+
+.title {
     font-size: 2.5rem;
     margin-bottom: 2rem;
     color: #32cd32;
     text-align: center;
-  }
-  
-  .year_selector {
+}
+
+.year_selector {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 2rem;
     gap: 1rem;
-  }
-  
-  .year_dropdown {
+}
+
+.year_dropdown {
     padding: 0.75rem 2rem;
     background-color: #2a2a2a;
     border: 1px solid #444;
@@ -40,13 +41,13 @@
     cursor: pointer;
     outline: none;
     text-align: center;
-  }
-  
-  .year_dropdown:focus {
+}
+
+.year_dropdown:focus {
     border-color: #32cd32;
-  }
-  
-  .custom_year_input {
+}
+
+.custom_year_input {
     padding: 0.75rem;
     background-color: #2a2a2a;
     border: 1px solid #444;
@@ -55,9 +56,9 @@
     font-size: 1.2rem;
     width: 120px;
     text-align: center;
-  }
-  
-  .year_nav_button {
+}
+
+.year_nav_button {
     background-color: #2a2a2a;
     color: #fff;
     border: 1px solid #444;
@@ -70,26 +71,26 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-  }
-  
-  .year_nav_button:hover:not(:disabled) {
+}
+
+.year_nav_button:hover:not(:disabled) {
     background-color: #444;
-  }
-  
-  .year_nav_button:disabled {
+}
+
+.year_nav_button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-  
-  .loading_container {
+}
+
+.loading_container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 300px;
-  }
-  
-  .loading_spinner {
+}
+
+.loading_spinner {
     width: 50px;
     height: 50px;
     border: 4px solid rgba(50, 205, 50, 0.3);
@@ -97,27 +98,29 @@
     border-top-color: #32cd32;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  .error_container {
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error_container {
     padding: 2rem;
     text-align: center;
     background-color: rgba(255, 71, 71, 0.1);
     border-radius: 8px;
     border-left: 4px solid #ff4747;
     margin: 2rem 0;
-  }
-  
-  .error_message {
+}
+
+.error_message {
     color: #ff4747;
     margin-bottom: 1rem;
-  }
-  
-  .retry_button {
+}
+
+.retry_button {
     background-color: #ff4747;
     color: white;
     border: none;
@@ -126,114 +129,115 @@
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.3s;
-  }
-  
-  .retry_button:hover {
+}
+
+.retry_button:hover {
     background-color: #e53e3e;
-  }
-  
-  .summary_cards {
+}
+
+.summary_cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
-  }
-  
-  .summary_card {
+}
+
+.summary_card {
     background-color: #2a2a2a;
     border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .summary_card h3 {
+}
+
+.summary_card h3 {
     color: #aaa;
     margin-top: 0;
     font-weight: 500;
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
-  }
-  
-  .summary_value {
+}
+
+.summary_value {
     color: #32cd32;
     font-size: 2rem;
     font-weight: 700;
-  }
-  
-  .charts_container {
+}
+
+.charts_container {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
     margin-bottom: 3rem;
-  }
-  
-  @media (min-width: 1024px) {
+}
+
+@media (min-width: 1024px) {
     .charts_container {
-      grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
-  }
-  
-  .chart_wrapper {
+}
+
+.chart_wrapper {
     background-color: #222;
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .chart_title {
+    min-width: 0;
+}
+
+.chart_title {
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.25rem;
     color: #fff;
     text-align: center;
-  }
-  
-  .chart {
+}
+
+.chart {
     height: 400px;
-  }
-  
-  .data_table_container {
+}
+
+.data_table_container {
     background-color: #222;
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .table_title {
+}
+
+.table_title {
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.25rem;
     color: #fff;
     text-align: center;
-  }
-  
-  .table_wrapper {
+}
+
+.table_wrapper {
     overflow-x: auto;
-  }
-  
-  .data_table {
+}
+
+.data_table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-  }
-  
-  .data_table th,
-  .data_table td {
+}
+
+.data_table th,
+.data_table td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #444;
-  }
-  
-  .data_table th {
+}
+
+.data_table th {
     background-color: rgba(50, 205, 50, 0.1);
     color: #32cd32;
     font-weight: 500;
-  }
-  
-  .data_table tr:nth-child(even) {
+}
+
+.data_table tr:nth-child(even) {
     background-color: rgba(255, 255, 255, 0.03);
-  }
-  
-  .data_table tr:hover {
+}
+
+.data_table tr:hover {
     background-color: rgba(255, 255, 255, 0.05);
-  }
+}
